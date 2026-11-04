@@ -71,6 +71,10 @@ export async function resolvePage(name, pages, options = {}) {
     }
     return load(found);
 }
+/** A package page name, checked against the generated PackagePages. */
+export function packagePage(name) {
+    return name;
+}
 export async function resolvePackagePage(packageName, page, options = {}) {
     const pkg = packages[packageName];
     const extensions = options.extensions ?? DEFAULT_EXTENSIONS;

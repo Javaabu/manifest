@@ -16,7 +16,7 @@ vi.mock("virtual:javaabu-manifest/pages", () => ({
     },
 }))
 
-const { isPackagePage, packagePageNames, parsePageName, resolvePage } = await import("./inertia.js")
+const { isPackagePage, packagePage, packagePageNames, parsePageName, resolvePage } = await import("./inertia.js")
 
 const appPages = {
     "./pages/Dashboard.tsx": async () => ({ default: "Dashboard" }),
@@ -74,6 +74,10 @@ describe("page names", () => {
         expect(parsePageName("filters::Reports/Show")).toEqual({ package: "filters", page: "Reports/Show" })
         expect(parsePageName("::Index")).toBeNull()
         expect(parsePageName("Index")).toBeNull()
+    })
+
+    it("passes page names through", () => {
+        expect(packagePage("filters::Index")).toBe("filters::Index")
     })
 
     it("lists every package page", () => {

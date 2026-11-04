@@ -19,4 +19,10 @@ return [
         'exists' => ':path already exists. Use --force to overwrite it.',
         'copied' => 'Copied to :path. Edit it there; it is used instead of the package\'s copy.',
     ],
+    'types' => [
+        'written' => 'Wrote the package page types to :path.',
+        'tsconfig_updated' => 'Added the package import paths to tsconfig.json.',
+        'no_tsconfig' => 'There is no tsconfig.json. If you use TypeScript, add these paths to it:',
+        'cannot_update' => 'tsconfig.json has comments or isn\'t plain JSON, so it was left alone. Add these paths to it:',
+    ],
 ];

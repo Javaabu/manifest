@@ -11,9 +11,11 @@ use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\View\Component;
+use Illuminate\View\FileViewFinder;
 use Javaabu\Manifest\Commands\DiscoverCommand;
 use Javaabu\Manifest\Commands\ListCommand;
 use Javaabu\Manifest\Commands\OverrideCommand;
+use Javaabu\Manifest\Commands\TypesCommand;
 use Javaabu\Manifest\Http\Controllers\DistAssetsController;
 use Javaabu\Manifest\Http\Middleware\InjectAssets;
 
@@ -35,6 +37,7 @@ class ManifestServiceProvider extends ServiceProvider
         $this->registerDirectives();
         $this->registerMiddleware();
         $this->registerDistRoute();
+        $this->registerInertiaTestingPages();
 
         if (! $this->app->runningInConsole()) {
             return;
@@ -44,6 +47,7 @@ class ManifestServiceProvider extends ServiceProvider
             DiscoverCommand::class,
             ListCommand::class,
             OverrideCommand::class,
+            TypesCommand::class,
         ]);
 
         $this->rediscoverAfterPackageDiscovery();
@@ -120,6 +124,28 @@ class ManifestServiceProvider extends ServiceProvider
                 ], ['manifest-dist', "manifest-dist-{$name}"]);
             }
         }
+    }
+
+    /**
+     * inertia-laravel checks that a page exists in assertInertia() with a view
+     * finder, which understands package::Page as a namespace.
+     */
+    protected function registerInertiaTestingPages(): void
+    {
+        $this->app->afterResolving('inertia.testing.view-finder', function (FileViewFinder $finder) {
+            $manifest = $this->app->make(Manifest::class);
+
+            foreach ($manifest->packages() as $name => $package) {
+                if (! $package->pagesPath()) {
+                    continue;
+                }
+
+                $finder->replaceNamespace($name, [
+                    $manifest->overridePath($name, $package->pagesPath()),
+                    $package->path($package->pagesPath()),
+                ]);
+            }
+        });
     }
 
     protected function registerDistRoute(): void

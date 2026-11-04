@@ -1,5 +1,17 @@
 import { packages } from "virtual:javaabu-manifest/pages"
 
+/**
+ * Every package page, by name. `php artisan manifest:types` fills it in for
+ * the app, so `PackagePageName` is a union like "filters::Index" and
+ * `PackagePageModule<"filters::Index">` is that page's module.
+ */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface PackagePages {}
+
+export type PackagePageName = keyof PackagePages extends never ? string : Extract<keyof PackagePages, string>
+
+export type PackagePageModule<K extends PackagePageName> = K extends keyof PackagePages ? PackagePages[K] : unknown
+
 export type PageLoader<T> = () => Promise<T>
 
 /** What `import.meta.glob()` returns, lazy or eager. */
@@ -119,6 +131,11 @@ export async function resolvePage<T = unknown>(
     }
 
     return load(found)
+}
+
+/** A package page name, checked against the generated PackagePages. */
+export function packagePage<K extends PackagePageName>(name: K): K {
+    return name
 }
 
 export async function resolvePackagePage<T = unknown>(

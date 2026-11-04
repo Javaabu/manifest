@@ -11,3 +11,4 @@ tests/Fixtures/app/bootstrap
 tests/Fixtures/app/storage
 *.php
 *.md
+tests/Fixtures/app/resources/js/types

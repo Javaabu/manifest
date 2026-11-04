@@ -2,6 +2,7 @@
 
 namespace Javaabu\Manifest;
 
+use FilesystemIterator;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\HtmlString;
 use Javaabu\Manifest\Attributes\RequiresAssets;
@@ -9,10 +10,15 @@ use Javaabu\Manifest\Contracts\DeclaresAssets;
 use Javaabu\Manifest\Exceptions\CircularDependencyException;
 use Javaabu\Manifest\Exceptions\UnknownAssetException;
 use Javaabu\Manifest\Rendering\Injector;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 use ReflectionClass;
 
 class Manifest
 {
+    /** @var array<int, string> */
+    public const array PAGE_EXTENSIONS = ['tsx', 'jsx', 'vue', 'ts', 'js', 'svelte'];
+
     /** @var array<string, Package> */
     protected array $packages = [];
 
@@ -262,6 +268,35 @@ class Manifest
     }
 
     /**
+     * Every Inertia page packages ship, as package::Page => file, with the
+     * app's overrides applied.
+     *
+     * @return array<string, string>
+     */
+    public function pages(): array
+    {
+        $pages = [];
+
+        foreach ($this->packages as $name => $package) {
+            $folder = $package->pagesPath();
+
+            if (! $folder) {
+                continue;
+            }
+
+            foreach ([$package->path($folder), $this->overridePath($name, $folder)] as $directory) {
+                foreach ($this->pageFiles($directory) as $page => $file) {
+                    $pages["{$name}::{$page}"] = $file;
+                }
+            }
+        }
+
+        ksort($pages);
+
+        return $pages;
+    }
+
+    /**
      * The real path of a package's prebuilt dist folder, if it has one.
      */
     public function distPath(string $package): ?string
@@ -305,6 +340,10 @@ class Manifest
         $base = $this->normalizePath($this->app->basePath()) . '/';
 
         $path = $this->normalizePath($path);
+
+        if ("{$path}/" === $base) {
+            return '';
+        }
 
         if (str_starts_with($path, $base)) {
             return substr($path, strlen($base));
@@ -356,6 +395,31 @@ class Manifest
             'packages' => (object) $packages,
             'assets' => $assets,
         ];
+    }
+
+    /**
+     * @return array<string, string> page name => file
+     */
+    protected function pageFiles(string $directory): array
+    {
+        if (! is_dir($directory)) {
+            return [];
+        }
+
+        $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directory, FilesystemIterator::SKIP_DOTS));
+        $pages = [];
+
+        foreach ($files as $file) {
+            if (! in_array(strtolower($file->getExtension()), self::PAGE_EXTENSIONS, true)) {
+                continue;
+            }
+
+            $relative = $this->normalizePath(substr($file->getPathname(), strlen($directory) + 1));
+
+            $pages[preg_replace('/\.[^.\/]+$/', '', $relative)] = $this->normalizePath($file->getPathname());
+        }
+
+        return $pages;
     }
 
     protected function normalizePath(string $path): string
