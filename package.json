@@ -46,6 +46,10 @@
             "types": "./dist/inertia.d.ts",
             "import": "./dist/inertia.js"
         },
+        "./package": {
+            "types": "./dist/package.d.ts",
+            "import": "./dist/package.js"
+        },
         "./package.json": "./package.json"
     },
     "packageManager": "pnpm@10.28.0",

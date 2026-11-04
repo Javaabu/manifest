@@ -25,4 +25,21 @@ return [
         'no_tsconfig' => 'There is no tsconfig.json. If you use TypeScript, add these paths to it:',
         'cannot_update' => 'tsconfig.json has comments or isn\'t plain JSON, so it was left alone. Add these paths to it:',
     ],
+    'check' => [
+        'package' => 'npm package',
+        'needs' => 'Needs',
+        'needed_by' => 'Needed by',
+        'installed' => 'Installed',
+        'status' => 'Status',
+        'nothing' => 'No package needs anything from npm.',
+        'ok' => 'Everything the packages need is installed.',
+        'problems' => '{1} :count npm package is missing or the wrong version. Install it with:|[2,*] :count npm packages are missing or the wrong version. Install them with:',
+        'statuses' => [
+            'ok' => 'OK',
+            'unchecked' => 'Installed (version not checked)',
+            'missing' => 'Missing from package.json',
+            'not_installed' => 'Not installed (run npm install)',
+            'mismatch' => 'Wrong version',
+        ],
+    ],
 ];

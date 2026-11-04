@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\View\Component;
 use Illuminate\View\FileViewFinder;
+use Javaabu\Manifest\Commands\CheckCommand;
 use Javaabu\Manifest\Commands\DiscoverCommand;
 use Javaabu\Manifest\Commands\ListCommand;
 use Javaabu\Manifest\Commands\OverrideCommand;
@@ -44,6 +45,7 @@ class ManifestServiceProvider extends ServiceProvider
         }
 
         $this->commands([
+            CheckCommand::class,
             DiscoverCommand::class,
             ListCommand::class,
             OverrideCommand::class,
