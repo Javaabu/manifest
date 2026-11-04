@@ -1,0 +1,10 @@
+{
+    "name": "javaabu/manifest-fixture-app",
+    "description": "The Laravel app the javaabu/manifest tests run in.",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    }
+}

@@ -3,13 +3,21 @@
 namespace Javaabu\Manifest;
 
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Support\HtmlString;
+use Javaabu\Manifest\Attributes\RequiresAssets;
+use Javaabu\Manifest\Contracts\DeclaresAssets;
 use Javaabu\Manifest\Exceptions\CircularDependencyException;
 use Javaabu\Manifest\Exceptions\UnknownAssetException;
+use Javaabu\Manifest\Rendering\Injector;
+use ReflectionClass;
 
 class Manifest
 {
     /** @var array<string, Package> */
     protected array $packages = [];
+
+    /** @var array<class-string, array<int, string>> */
+    protected array $class_requirements = [];
 
     public function __construct(
         protected Application $app,
@@ -106,6 +114,104 @@ class Manifest
     }
 
     /**
+     * Load assets on the current page: asset ids (package::name), or package
+     * names for all of a package's assets. Unknown assets and broken
+     * dependencies throw here, while the view is rendering.
+     *
+     * @param  string|array<int, string>  ...$ids
+     */
+    public function require(string|array ...$ids): static
+    {
+        $ids = array_merge(...array_map(fn ($id) => (array) $id, $ids));
+
+        $requirements = $this->requirements();
+
+        foreach ($this->resolve($ids) as $asset) {
+            $requirements->add($asset->id());
+        }
+
+        return $this;
+    }
+
+    /**
+     * Require what a component declares with #[RequiresAssets] or
+     * DeclaresAssets.
+     */
+    public function requireFor(object $component): void
+    {
+        $ids = $this->class_requirements[$component::class] ??= $this->declaredOn($component::class);
+
+        if ($component instanceof DeclaresAssets) {
+            $ids = [...$ids, ...$component->requiredAssets()];
+        }
+
+        if ($ids) {
+            $this->require($ids);
+        }
+    }
+
+    public function isRequired(string $id): bool
+    {
+        return $this->requirements()->has($id);
+    }
+
+    /**
+     * The assets the current request needs, in dependency order.
+     *
+     * @return array<int, Asset>
+     */
+    public function required(): array
+    {
+        return $this->resolve($this->requirements()->ids());
+    }
+
+    /**
+     * Render the required styles now (for views rendered outside a request,
+     * like mail). The directives are better in pages: they also pick up
+     * components rendered after them.
+     *
+     * @param  array<int, string>  $scope  packages or asset ids; all when empty
+     */
+    public function renderStyles(array $scope = []): HtmlString
+    {
+        return $this->renderNow('styles', $scope);
+    }
+
+    /**
+     * Render the required scripts now. See renderStyles().
+     *
+     * @param  array<int, string>  $scope  packages or asset ids; all when empty
+     */
+    public function renderScripts(array $scope = []): HtmlString
+    {
+        return $this->renderNow('scripts', $scope);
+    }
+
+    /**
+     * What @manifestStyles and @manifestScripts print: a marker filled with
+     * tags once the response is ready. Named assets are required.
+     *
+     * @param  array<int, string>  $scope
+     */
+    public function placeholder(string $kind, array $scope = []): HtmlString
+    {
+        $scope = array_values(array_filter($scope));
+
+        foreach ($scope as $item) {
+            str_contains($item, '::')
+                ? $this->require($item)
+                : $this->package($item);
+        }
+
+        return new HtmlString(Injector::placeholder($kind, $scope ? implode(',', $scope) : '*'));
+    }
+
+    public function requirements(): AssetRequirements
+    {
+        return $this->app->make(AssetRequirements::class);
+    }
+
+    /**
      * The registered package that owns the asset.
      */
     public function packageFor(Asset $asset): Package
@@ -173,6 +279,35 @@ class Manifest
         }
 
         return $path;
+    }
+
+    /**
+     * @param  array<int, string>  $scope
+     */
+    protected function renderNow(string $kind, array $scope): HtmlString
+    {
+        $injector = $this->app->make(Injector::class);
+
+        $html = $injector->inject($this->placeholder($kind, $scope)->toHtml(), auto: false);
+
+        return new HtmlString($html);
+    }
+
+    /**
+     * @param  class-string  $class
+     * @return array<int, string>
+     */
+    protected function declaredOn(string $class): array
+    {
+        $ids = [];
+
+        for ($reflection = new ReflectionClass($class); $reflection; $reflection = $reflection->getParentClass()) {
+            foreach ($reflection->getAttributes(RequiresAssets::class) as $attribute) {
+                $ids = [...$attribute->newInstance()->assets, ...$ids];
+            }
+        }
+
+        return $ids;
     }
 
     /**

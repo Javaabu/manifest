@@ -21,4 +21,9 @@ class WidgetsServiceProvider extends ServiceProvider
                 ->npm(peer_dependencies: ['vue' => '^3.5']);
         });
     }
+
+    public function boot(): void
+    {
+        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'widgets');
+    }
 }

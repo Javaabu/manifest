@@ -2,6 +2,7 @@
 
 namespace Acme\Filters;
 
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Javaabu\Manifest\Concerns\RegistersAssets;
 use Javaabu\Manifest\Package;
@@ -12,6 +13,10 @@ class FiltersServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'filters');
+
+        Blade::componentNamespace('Acme\\Filters\\Components', 'filters');
+
         $this->registerAssets('filters', __DIR__ . '/../resources', function (Package $package) {
             $package
                 ->js()
