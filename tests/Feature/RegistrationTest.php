@@ -142,7 +142,7 @@ class RegistrationTest extends TestCase
         $asset = Manifest::find('filters::filter-bar');
 
         $this->assertEquals(
-            $this->fixturePath('packages/filters/resources/js/filter-bar.ts'),
+            $this->packagePath('filters/resources/js/filter-bar.ts'),
             Manifest::entryPath($asset),
         );
 
@@ -151,7 +151,7 @@ class RegistrationTest extends TestCase
 
         $this->assertEquals(resource_path('vendor/filters/js/filter-bar.ts'), Manifest::entryPath($asset));
         $this->assertEquals(
-            $this->fixturePath('packages/filters/resources/js/date-range.tsx'),
+            $this->packagePath('filters/resources/js/date-range.tsx'),
             Manifest::entryPath(Manifest::find('filters::date-range')),
         );
     }

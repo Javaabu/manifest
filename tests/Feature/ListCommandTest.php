@@ -3,7 +3,6 @@
 namespace Javaabu\Manifest\Tests\Feature;
 
 use Illuminate\Support\Facades\Artisan;
-use Javaabu\Manifest\Manifest;
 use Javaabu\Manifest\Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 
@@ -14,11 +13,11 @@ class ListCommandTest extends TestCase
     {
         $this->artisan('manifest:list', ['package' => 'filters'])
             ->expectsTable(['Asset', 'Type', 'Entry', 'Depends on'], [
-                ['widgets::theme', 'sass', $this->relative('widgets/resources/css/theme.scss'), ''],
-                ['widgets::core', 'js', $this->relative('widgets/resources/js/core.js'), 'widgets::theme'],
-                ['filters::styles', 'css', $this->relative('filters/resources/css/filter-bar.css'), 'widgets::theme'],
-                ['filters::filter-bar', 'ts', $this->relative('filters/resources/js/filter-bar.ts'), 'widgets::core, filters::styles'],
-                ['filters::date-range', 'react', $this->relative('filters/resources/js/date-range.tsx'), 'filters::filter-bar'],
+                ['widgets::theme', 'sass', 'vendor/acme/widgets/resources/css/theme.scss', ''],
+                ['widgets::core', 'js', 'vendor/acme/widgets/resources/js/core.js', 'widgets::theme'],
+                ['filters::styles', 'css', 'vendor/acme/filters/resources/css/filter-bar.css', 'widgets::theme'],
+                ['filters::filter-bar', 'ts', 'vendor/acme/filters/resources/js/filter-bar.ts', 'widgets::core, filters::styles'],
+                ['filters::date-range', 'react', 'vendor/acme/filters/resources/js/date-range.tsx', 'filters::filter-bar'],
             ])
             ->expectsOutputToContain('5 assets, in dependency order.')
             ->assertSuccessful();
@@ -50,10 +49,5 @@ class ListCommandTest extends TestCase
 
         $this->assertStringContainsString('ބަރޯސާވަނީ', $output);
         $this->assertStringContainsString('3 އެސެޓް، ބަރޯސާވާ ތަރުތީބުން.', $output);
-    }
-
-    protected function relative(string $path): string
-    {
-        return app(Manifest::class)->relativeToBase($this->fixturePath("packages/{$path}"));
     }
 }

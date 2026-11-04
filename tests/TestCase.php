@@ -14,6 +14,15 @@ abstract class TestCase extends BaseTestCase
      */
     protected bool $with_fixture_packages = true;
 
+    /**
+     * A small Laravel app in tests/Fixtures/app, with the fixture packages
+     * installed in its vendor folder like real Composer packages.
+     */
+    public static function applicationBasePath(): string
+    {
+        return __DIR__ . '/Fixtures/app';
+    }
+
     protected function getPackageProviders($app): array
     {
         if (! $this->with_fixture_packages) {
@@ -27,8 +36,8 @@ abstract class TestCase extends BaseTestCase
         ];
     }
 
-    protected function fixturePath(string $path = ''): string
+    protected function packagePath(string $path = ''): string
     {
-        return rtrim(__DIR__ . '/Fixtures/' . ltrim($path, '/'), '/');
+        return rtrim(base_path('vendor/acme/' . ltrim($path, '/')), '/');
     }
 }

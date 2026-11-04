@@ -37,8 +37,8 @@
     "autoload-dev": {
         "psr-4": {
             "Javaabu\\Manifest\\Tests\\": "tests/",
-            "Acme\\Filters\\": "tests/Fixtures/packages/filters/src/",
-            "Acme\\Widgets\\": "tests/Fixtures/packages/widgets/src/"
+            "Acme\\Filters\\": "tests/Fixtures/app/vendor/acme/filters/src/",
+            "Acme\\Widgets\\": "tests/Fixtures/app/vendor/acme/widgets/src/"
         }
     },
     "scripts": {
