@@ -1,21 +1,21 @@
 {
-    "compilerOptions": {
-        "target": "ES2022",
-        "module": "ESNext",
-        "moduleResolution": "Bundler",
-        "jsx": "react-jsx",
-        "strict": true,
-        "allowJs": true,
-        "skipLibCheck": true,
-        "noEmit": true,
-        "types": ["vite/client"],
-        "paths": {
-            "@javaabu/manifest/inertia": ["../../../dist/inertia.d.ts"],
-            "@javaabu/filters": ["./vendor/acme/filters/resources/js"],
-            "@javaabu/filters/*": ["./vendor/acme/filters/resources/js/*"],
-            "@javaabu/widgets": ["./vendor/acme/widgets/resources/js"],
-            "@javaabu/widgets/*": ["./vendor/acme/widgets/resources/js/*"]
-        }
-    },
-    "include": ["resources/js", "vendor/acme/*/resources/js"]
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "allowJs": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "types": ["vite/client"],
+    "paths": {
+      "@javaabu/manifest/inertia": ["../../../dist/inertia.d.ts"],
+      "@javaabu/filters": ["./vendor/acme/filters/resources/js"],
+      "@javaabu/filters/*": ["./vendor/acme/filters/resources/js/*"],
+      "@javaabu/widgets": ["./vendor/acme/widgets/resources/js"],
+      "@javaabu/widgets/*": ["./vendor/acme/widgets/resources/js/*"]
+    }
+  },
+  "include": ["resources/js", "vendor/acme/*/resources/js"]
 }

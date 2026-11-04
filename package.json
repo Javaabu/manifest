@@ -1,94 +1,94 @@
 {
-    "name": "@javaabu/manifest",
-    "version": "0.0.0",
-    "description": "Vite plugin and Inertia page resolver for javaabu/manifest, which ships CSS, JS, TS, React and Vue from Laravel packages. Ships inside the Composer package; install with file:vendor/javaabu/manifest or import from vendor/javaabu/manifest/dist.",
-    "license": "MIT",
-    "author": {
-        "name": "Javaabu Pvt. Ltd.",
-        "url": "https://javaabu.com"
+  "name": "@javaabu/manifest",
+  "version": "0.0.0",
+  "description": "Vite plugin and Inertia page resolver for javaabu/manifest, which ships CSS, JS, TS, React and Vue from Laravel packages. Ships inside the Composer package; install with file:vendor/javaabu/manifest or import from vendor/javaabu/manifest/dist.",
+  "license": "MIT",
+  "author": {
+    "name": "Javaabu Pvt. Ltd.",
+    "url": "https://javaabu.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Javaabu/manifest.git"
+  },
+  "homepage": "https://github.com/Javaabu/manifest#readme",
+  "bugs": {
+    "url": "https://github.com/Javaabu/manifest/issues"
+  },
+  "keywords": [
+    "laravel",
+    "vite",
+    "vite-plugin",
+    "inertia",
+    "assets",
+    "javaabu"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "types": "./dist/vite.d.ts",
+  "files": [
+    "dist",
+    "docs",
+    "llms.txt",
+    "resources/boost",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/vite.d.ts",
+      "import": "./dist/vite.js"
     },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/Javaabu/manifest.git"
+    "./vite": {
+      "types": "./dist/vite.d.ts",
+      "import": "./dist/vite.js"
     },
-    "homepage": "https://github.com/Javaabu/manifest#readme",
-    "bugs": {
-        "url": "https://github.com/Javaabu/manifest/issues"
+    "./inertia": {
+      "types": "./dist/inertia.d.ts",
+      "import": "./dist/inertia.js"
     },
-    "keywords": [
-        "laravel",
-        "vite",
-        "vite-plugin",
-        "inertia",
-        "assets",
-        "javaabu"
-    ],
-    "type": "module",
-    "sideEffects": false,
-    "types": "./dist/vite.d.ts",
-    "files": [
-        "dist",
-        "docs",
-        "llms.txt",
-        "resources/boost",
-        "README.md"
-    ],
-    "exports": {
-        ".": {
-            "types": "./dist/vite.d.ts",
-            "import": "./dist/vite.js"
-        },
-        "./vite": {
-            "types": "./dist/vite.d.ts",
-            "import": "./dist/vite.js"
-        },
-        "./inertia": {
-            "types": "./dist/inertia.d.ts",
-            "import": "./dist/inertia.js"
-        },
-        "./package": {
-            "types": "./dist/package.d.ts",
-            "import": "./dist/package.js"
-        },
-        "./package.json": "./package.json"
+    "./package": {
+      "types": "./dist/package.d.ts",
+      "import": "./dist/package.js"
     },
-    "packageManager": "pnpm@10.28.0",
-    "engines": {
-        "node": ">=20.19"
-    },
-    "scripts": {
-        "build": "tsc -p tsconfig.build.json",
-        "test": "vitest run --project unit",
-        "test:watch": "vitest --project unit",
-        "test:coverage": "vitest run --coverage",
-        "test:e2e": "vitest run --project e2e",
-        "typecheck": "tsc --noEmit -p tsconfig.json && tsc -p tests/Fixtures/app/tsconfig.json",
-        "lint": "eslint .",
-        "format": "prettier --write .",
-        "format:check": "prettier --check ."
-    },
-    "peerDependencies": {
-        "vite": "^6.0.0 || ^7.0.0 || ^8.0.0"
-    },
-    "devDependencies": {
-        "@eslint/js": "^10.0.1",
-        "@types/node": "^26.6.6",
-        "@types/react": "^19.3.0",
-        "@types/react-dom": "^19.3.0",
-        "@vitejs/plugin-react": "^6.2.1",
-        "@vitejs/plugin-vue": "^6.0.10",
-        "@vitest/coverage-v8": "^5.0.5",
-        "eslint": "^10.14.0",
-        "globals": "^17.14.0",
-        "laravel-vite-plugin": "^3.2.0",
-        "prettier": "^3.9.10",
-        "react": "^19.3.1",
-        "react-dom": "^19.3.1",
-        "sass": "^1.107.1",
-        "typescript": "~6.0.3",
-        "typescript-eslint": "^8.72.1",
-        "vite": "^8.3.5",
-        "vitest": "^5.0.5",
-        "vue": "^3.5.44"
-    }
+    "./package.json": "./package.json"
+  },
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=20.19"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run --project unit",
+    "test:watch": "vitest --project unit",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "vitest run --project e2e",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc -p tests/Fixtures/app/tsconfig.json",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "peerDependencies": {
+    "vite": "^6.0.0 || ^7.0.0 || ^8.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.2.1",
+    "@vitejs/plugin-vue": "^6.0.10",
+    "@vitest/coverage-v8": "^5.0.5",
+    "eslint": "^10.14.0",
+    "globals": "^17.14.0",
+    "laravel-vite-plugin": "^3.2.0",
+    "prettier": "^3.9.10",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "sass": "^1.107.1",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.72.1",
+    "vite": "^8.3.5",
+    "vitest": "^5.0.5",
+    "vue": "^3.5.44"
+  }
 }

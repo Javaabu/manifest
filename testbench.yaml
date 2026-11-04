@@ -4,9 +4,9 @@
 laravel: ./tests/Fixtures/app
 
 providers:
-    - Acme\Widgets\WidgetsServiceProvider
-    - Javaabu\Manifest\ManifestServiceProvider
-    - Acme\Filters\FiltersServiceProvider
+  - Acme\Widgets\WidgetsServiceProvider
+  - Javaabu\Manifest\ManifestServiceProvider
+  - Acme\Filters\FiltersServiceProvider
 
 dont-discover:
-    - "*"
+  - "*"

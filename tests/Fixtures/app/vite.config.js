@@ -12,17 +12,17 @@ import manifest from "../../../dist/vite.js"
 const repo = fileURLToPath(new URL("../../..", import.meta.url))
 
 export default defineConfig({
-    plugins: [
-        laravel({
-            input: ["resources/js/app.tsx"],
-            buildDirectory: "e2e-build",
-            hotFile: "public/e2e-hot",
-            refresh: false,
-        }),
-        manifest({
-            discover: `TESTBENCH_WORKING_PATH="${repo}" php "${path.join(repo, "vendor/bin/testbench")}" manifest:discover`,
-        }),
-        react(),
-        vue(),
-    ],
+  plugins: [
+    laravel({
+      input: ["resources/js/app.tsx"],
+      buildDirectory: "e2e-build",
+      hotFile: "public/e2e-hot",
+      refresh: false,
+    }),
+    manifest({
+      discover: `TESTBENCH_WORKING_PATH="${repo}" php "${path.join(repo, "vendor/bin/testbench")}" manifest:discover`,
+    }),
+    react(),
+    vue(),
+  ],
 })

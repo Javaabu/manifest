@@ -13,23 +13,23 @@ export const PAGE_EXTENSIONS = ["tsx", "jsx", "vue", "ts", "js", "svelte"]
  * app root, the way Vite's import.meta.glob expects them.
  */
 export function pagesModule(root: string, packages: ResolvedPackage[]): string {
-    const extensions = `{${PAGE_EXTENSIONS.join(",")}}`
+  const extensions = `{${PAGE_EXTENSIONS.join(",")}}`
 
-    const entries = packages
-        .filter((pkg) => pkg.pagesDir && pkg.info.pages)
-        .map((pkg) => {
-            const base = `/${toPosix(path.relative(root, pkg.pagesDir as string))}/`
-            const overrideBase = `/${toPosix(path.relative(root, path.join(pkg.overridesDir, pkg.info.pages as string)))}/`
+  const entries = packages
+    .filter((pkg) => pkg.pagesDir && pkg.info.pages)
+    .map((pkg) => {
+      const base = `/${toPosix(path.relative(root, pkg.pagesDir as string))}/`
+      const overrideBase = `/${toPosix(path.relative(root, path.join(pkg.overridesDir, pkg.info.pages as string)))}/`
 
-            return [
-                `  ${JSON.stringify(pkg.name)}: {`,
-                `    base: ${JSON.stringify(base)},`,
-                `    overrideBase: ${JSON.stringify(overrideBase)},`,
-                `    pages: import.meta.glob(${JSON.stringify(`${base}**/*.${extensions}`)}),`,
-                `    overrides: import.meta.glob(${JSON.stringify(`${overrideBase}**/*.${extensions}`)}),`,
-                `  },`,
-            ].join("\n")
-        })
+      return [
+        `  ${JSON.stringify(pkg.name)}: {`,
+        `    base: ${JSON.stringify(base)},`,
+        `    overrideBase: ${JSON.stringify(overrideBase)},`,
+        `    pages: import.meta.glob(${JSON.stringify(`${base}**/*.${extensions}`)}),`,
+        `    overrides: import.meta.glob(${JSON.stringify(`${overrideBase}**/*.${extensions}`)}),`,
+        `  },`,
+      ].join("\n")
+    })
 
-    return `export const packages = {\n${entries.join("\n")}\n}\n`
+  return `export const packages = {\n${entries.join("\n")}\n}\n`
 }

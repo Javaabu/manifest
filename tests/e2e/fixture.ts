@@ -17,23 +17,23 @@ export const discoverCommand = `TESTBENCH_WORKING_PATH="${repo}" php "${path.joi
  * e2e tests count towards coverage.
  */
 export function fixtureConfig(overrides: InlineConfig = {}, options: ManifestPluginOptions = {}): InlineConfig {
-    return mergeConfig(
-        {
-            root: app,
-            configFile: false,
-            logLevel: "warn",
-            plugins: [
-                laravel({
-                    input: ["resources/js/app.tsx"],
-                    buildDirectory: "e2e-build",
-                    hotFile: "public/e2e-hot",
-                    refresh: false,
-                }),
-                manifest({ discover: discoverCommand, ...options }),
-                react(),
-                vue(),
-            ],
-        },
-        overrides,
-    )
+  return mergeConfig(
+    {
+      root: app,
+      configFile: false,
+      logLevel: "warn",
+      plugins: [
+        laravel({
+          input: ["resources/js/app.tsx"],
+          buildDirectory: "e2e-build",
+          hotFile: "public/e2e-hot",
+          refresh: false,
+        }),
+        manifest({ discover: discoverCommand, ...options }),
+        react(),
+        vue(),
+      ],
+    },
+    overrides,
+  )
 }

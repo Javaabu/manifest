@@ -1,15 +1,15 @@
 import {
-    packagePage,
-    packagePageNames,
-    resolvePage,
-    type PackagePageModule,
-    type PackagePageName,
+  packagePage,
+  packagePageNames,
+  resolvePage,
+  type PackagePageModule,
+  type PackagePageName,
 } from "@javaabu/manifest/inertia"
 import { FilterBar, label } from "@javaabu/filters"
 import { widget } from "@javaabu/widgets"
 
 export function resolve(name: string) {
-    return resolvePage(name, import.meta.glob("./pages/**/*.tsx"))
+  return resolvePage(name, import.meta.glob("./pages/**/*.tsx"))
 }
 
 // The page types from `php artisan manifest:types` (resources/js/types/manifest.d.ts).

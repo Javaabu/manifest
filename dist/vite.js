@@ -116,16 +116,30 @@ export default function manifest(options = {}) {
     let discovery = { version: 1, packages: {}, assets: [] };
     let packages = [];
     let config;
+    let loaded = false;
     const pending = [];
+    const load = (from) => {
+        root = from;
+        discovery = loadDiscovery(root, options, (message) => pending.push(message));
+        packages = resolvePackages(root, discovery);
+        loaded = true;
+    };
     return {
         name: "javaabu-manifest",
         enforce: "pre",
         packages: () => packages,
-        inputs: () => computeInputs(root, discovery, packages),
+        inputs() {
+            // Called from vite.config.js before Vite runs the plugin: discover now.
+            if (!loaded) {
+                load(process.cwd());
+            }
+            return computeInputs(root, discovery, packages);
+        },
         config(userConfig) {
-            root = path.resolve(userConfig.root ?? process.cwd());
-            discovery = loadDiscovery(root, options, (message) => pending.push(message));
-            packages = resolvePackages(root, discovery);
+            const from = path.resolve(userConfig.root ?? process.cwd());
+            if (!loaded || from !== root) {
+                load(from);
+            }
             const allow = new Set([searchForWorkspaceRoot(root)]);
             for (const pkg of packages) {
                 allow.add(pkg.realDir);
@@ -186,9 +200,7 @@ export default function manifest(options = {}) {
                 // so overriding one file doesn't mean copying its neighbours.
                 const from = owner.override ? path.join(owner.pkg.realDir, owner.relative) : importer;
                 const resolved = (await this.resolve(source, from, { ...resolveOptions, skipSelf: true })) ??
-                    (owner.override
-                        ? await this.resolve(source, importer, { ...resolveOptions, skipSelf: true })
-                        : null);
+                    (owner.override ? await this.resolve(source, importer, { ...resolveOptions, skipSelf: true }) : null);
                 if (!resolved) {
                     return null;
                 }
