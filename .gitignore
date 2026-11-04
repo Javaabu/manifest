@@ -1,0 +1,15 @@
+/vendor
+/node_modules
+/build
+/coverage
+composer.lock
+.phpunit.result.cache
+.phpunit.cache
+.php-cs-fixer.cache
+.idea
+.DS_Store
+clover.xml
+/tests/e2e/app/node_modules
+/tests/e2e/app/public/build
+/tests/e2e/app/public/hot
+/tests/e2e/app/bootstrap/cache/*.json

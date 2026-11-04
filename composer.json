@@ -1,0 +1,66 @@
+{
+    "name": "javaabu/manifest",
+    "description": "Ship CSS, Sass, JS, TypeScript, React and Vue from Laravel packages: register assets in a service provider, load them automatically or with Blade directives, and build them with Vite.",
+    "homepage": "https://github.com/Javaabu/manifest",
+    "license": "MIT",
+    "keywords": [
+        "javaabu",
+        "laravel",
+        "manifest",
+        "assets",
+        "vite",
+        "inertia"
+    ],
+    "authors": [
+        {
+            "name": "Javaabu Pvt. Ltd.",
+            "email": "info@javaabu.com",
+            "homepage": "https://javaabu.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.4",
+        "laravel/framework": "^12.0 || ^13.0"
+    },
+    "require-dev": {
+        "javaabu/boost-javaabu-guidelines": "^1.4",
+        "laravel/pint": "^1.24",
+        "orchestra/testbench": "^10.0 || ^11.0",
+        "phpunit/phpunit": "^11.5.3 || ^12.5.8"
+    },
+    "autoload": {
+        "psr-4": {
+            "Javaabu\\Manifest\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Javaabu\\Manifest\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "test-coverage": "vendor/bin/phpunit --coverage-clover=clover.xml",
+        "lint": "vendor/bin/pint --test",
+        "format": "vendor/bin/pint"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-main": "1.x-dev"
+        },
+        "laravel": {
+            "providers": [
+                "Javaabu\\Manifest\\ManifestServiceProvider"
+            ],
+            "aliases": {
+                "Manifest": "Javaabu\\Manifest\\Facades\\Manifest"
+            }
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
