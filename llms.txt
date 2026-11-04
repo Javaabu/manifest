@@ -1,0 +1,44 @@
+# javaabu/manifest
+
+> Ships CSS, Sass, JS, TypeScript, React and Vue from Laravel packages to apps. Packages register assets in their service provider; Blade components declare what they need and it's injected into the page (or placed with @manifestStyles / @manifestScripts); the app's Vite builds everything through a plugin; Inertia renders package pages as package::Page; apps override any single file in resources/vendor/{package}.
+
+Paths are relative to this file. In an app, that's vendor/javaabu/manifest/.
+
+## Rules
+
+- Assets are named `package::name`. Register them with `$this->registerAssets('pkg', __DIR__ . '/../resources', fn (Package $package) => ...)` (trait `Javaabu\Manifest\Concerns\RegistersAssets`), entries relative to the package's resources folder.
+- A Blade component declares its assets with `#[RequiresAssets('pkg::asset')]` or `DeclaresAssets::requiredAssets()`; anonymous components and views use `@manifestRequire('pkg::asset')`. Don't add `<script>` or `<link>` tags for package assets by hand, and don't add package entries to the app's `laravel({ input })`.
+- Required assets are injected automatically into HTML responses. Use `@manifestStyles` / `@manifestScripts` only to choose where they go.
+- Order comes from `depends_on`. A script that needs its own CSS imports it (`import './select.css'`).
+- Package JS is imported as `@javaabu/{name}` (after `->js()`), resolved by the Vite plugin: `import manifest from "./vendor/javaabu/manifest/dist/vite.js"` next to `laravel()`. Never copy package JS into the app to use it.
+- Inertia: `Inertia::render('pkg::Page')`, and in the app `resolve: (name) => resolvePage(name, import.meta.glob("./pages/**/*.tsx"))` from `@javaabu/manifest/inertia`.
+- To change a package's file, override that one file at `resources/vendor/{package}/<same path>` (`php artisan manifest:override pkg path`). Don't edit vendor/.
+- Packages declare npm packages their code imports with `->npm()`; apps run `php artisan manifest:check` to install them.
+- Run `php artisan manifest:types` after installing packages in a TypeScript app.
+- In tests, `Manifest::fake()` then `Manifest::assertAssetRequired('pkg::asset')`.
+- Asset tags are rendered by Laravel's Vite: `Vite::useCspNonce()` and friends apply.
+
+## Docs
+
+- [Introduction](docs/intro.md): what the package does
+- [Requirements](docs/requirements.md): PHP, Laravel, Node and Vite versions
+- [Installation & Setup](docs/installation-and-setup.md): the Vite plugin, Inertia, TypeScript, config file
+- [Registering assets](docs/basic-usage/registering-assets.md): the Package API, types, dependencies, aliases, pages, npm, dist, manifest:list
+- [Loading assets in Blade](docs/basic-usage/loading-assets.md): RequiresAssets, DeclaresAssets, @manifestRequire, injection, directives, CSP
+- [Vite](docs/basic-usage/vite.md): the plugin, its options, discovery, Docker, path repositories
+- [Inertia pages](docs/basic-usage/inertia-pages.md): package pages, resolvePage() for React and Vue, testing
+- [Overriding assets](docs/basic-usage/overriding-assets.md): single-file overrides, publishing, resolution order
+- [Building a package](docs/advanced-usage/building-a-package.md): the checklist and reference packages for package authors
+- [Prebuilt assets](docs/advanced-usage/prebuilt-assets.md): dist, packageBuild(), serving and publishing
+- [TypeScript](docs/advanced-usage/typescript.md): manifest:types, import paths, page types
+- [Testing](docs/advanced-usage/testing.md): Manifest::fake() and its assertions
+- [Configuration](docs/advanced-usage/configuration.md): every option
+- [Commands](docs/advanced-usage/commands.md): every artisan command and publishing tag
+- [API reference](docs/advanced-usage/api-reference.md): every PHP and JS class, method and export
+- [How it works](docs/advanced-usage/how-it-works.md): registration, rendering, the plugin's hooks, paths
+- [Dhivehi and RTL](docs/advanced-usage/localization.md): translations, RTL guidance for package authors
+- [AI assistants](docs/ai-assistants.md): Laravel Boost, and using these docs from other assistants
+- [Questions and Security](docs/questions-and-security.md): where to get help
+- [Changelog](docs/changelog.md): where changes are listed
+- [About Us](docs/about-us.md): Javaabu
+- [Contributing to the docs](docs/contributing-to-docs.md): how the docs are built

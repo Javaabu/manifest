@@ -1,0 +1,5 @@
+{
+    "name": "Manifest",
+    "description": "Ship CSS, Sass, JS, TypeScript, React and Vue from Laravel packages: register assets in a service provider, load them automatically or with Blade directives, and build them with Vite",
+    "version": "1"
+}

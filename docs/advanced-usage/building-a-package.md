@@ -1,0 +1,154 @@
+---
+title: Building a package
+sidebar_position: 1
+---
+
+This page is the checklist for a package that ships frontend code through manifest. The reference packages are in this repository, in [`tests/Fixtures/app/vendor/acme`](https://github.com/Javaabu/manifest/tree/main/tests/Fixtures/app/vendor/acme): `filters` (Blade components, React, TypeScript, Inertia pages) and `widgets` (Sass, plain JS, Vue, prebuilt dist).
+
+# Layout
+
+```
+filters/
+├── composer.json            requires javaabu/manifest
+├── package.json             dev tooling only (vite, typescript, tests)
+├── vite.config.js           optional: builds dist/ with packageBuild()
+├── dist/                    optional: prebuilt assets, committed or built on release
+├── resources/
+│   ├── css/filters.css
+│   ├── js/
+│   │   ├── index.ts         what apps import as @javaabu/filters
+│   │   ├── filter-bar.ts    a Blade entry
+│   │   ├── components/FilterBar.tsx
+│   │   └── Pages/           Inertia pages: filters::Index
+│   └── views/components/filter-bar.blade.php
+└── src/
+    ├── FiltersServiceProvider.php
+    └── Components/FilterBar.php
+```
+
+# 1. Register
+
+```php
+<?php
+
+namespace Javaabu\Filters;
+
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\ServiceProvider;
+use Javaabu\Manifest\Concerns\RegistersAssets;
+use Javaabu\Manifest\Package;
+
+class FiltersServiceProvider extends ServiceProvider
+{
+    use RegistersAssets;
+
+    public function boot(): void
+    {
+        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'filters');
+
+        Blade::componentNamespace('Javaabu\\Filters\\Components', 'filters');
+
+        $this->registerAssets('filters', __DIR__ . '/../resources', function (Package $package) {
+            $package
+                ->style('filters', 'css/filters.css')
+                ->script('filter-bar', 'js/filter-bar.ts', depends_on: ['filters'])
+                ->js()
+                ->pages()
+                ->dist()
+                ->npm(['@javaabu/onu' => '^1.0'], peer_dependencies: ['react' => '^19.0', 'react-dom' => '^19.0']);
+        });
+    }
+}
+```
+
+See [Registering assets](../basic-usage/registering-assets) for every method.
+
+# 2. Declare what components need
+
+```php
+#[RequiresAssets('filters::filter-bar')]
+class FilterBar extends Component {}
+```
+
+See [Loading assets in Blade](../basic-usage/loading-assets).
+
+# 3. npm dependencies
+
+Your JS and CSS are built by the **app's** Vite, from the app's `node_modules`. Every npm package your code imports must be declared:
+
+```php
+$package->npm(
+    ['tom-select' => '^2.4'],                         // the app installs these
+    peer_dependencies: ['react' => '^19.0'],          // and these, shared with its own code
+);
+```
+
+Ranges use npm syntax (`^`, `~`, `>=`, `||`, x-ranges, hyphen ranges). Git and `file:` dependencies (`github:Javaabu/react-forms#main`) are fine; their version isn't checked.
+
+The app developer runs:
+
+```bash
+php artisan manifest:check
+```
+
+It lists every npm package the app's Laravel packages need: their `npm()` dependencies, `sass` for Sass styles, React or Vue and their Vite plugins for `react()` / `vue()` assets, and `vite` and `laravel-vite-plugin`. Each is checked against `package.json` and the installed version in `node_modules`, and the command prints the install command for the app's package manager (npm, pnpm, Yarn or Bun). It exits with an error when something is missing, so it can run in CI.
+
+Keep your package's own `package.json` for developing the package: Vite, TypeScript, and the dependencies above as dev dependencies so your tests and builds work. Apps never install it.
+
+# 4. TypeScript
+
+Write `resources/js` as if it were in the app: relative imports for your own code, your alias (`@javaabu/filters/...`) if you prefer, and bare imports for npm packages. In your package's `tsconfig.json`, map your own alias:
+
+```json
+{
+  "compilerOptions": {
+    "paths": {
+      "@javaabu/filters": ["./resources/js"],
+      "@javaabu/filters/*": ["./resources/js/*"]
+    }
+  },
+  "include": ["resources/js"]
+}
+```
+
+Apps get the same mapping from `php artisan manifest:types`.
+
+# 5. Prebuilt assets (optional)
+
+To support apps that don't build with Vite, ship a `dist` built with the preset:
+
+```js
+// vite.config.js in the package
+import react from "@vitejs/plugin-react"
+import { defineConfig } from "vite"
+import { packageBuild } from "./vendor/javaabu/manifest/dist/package.js"
+
+export default defineConfig({
+  ...packageBuild({ input: ["css/filters.css", "js/filter-bar.ts"] }),
+  plugins: [react()],
+})
+```
+
+```bash
+npx vite build   # writes dist/ and dist/.vite/manifest.json
+```
+
+The `input` paths are the entries you register. Register the folder with `->dist()`. See [Prebuilt assets](./prebuilt-assets).
+
+# 6. Test
+
+Use [`Manifest::fake()`](./testing) in your package's tests to check what your components require without a Vite build. Use [Testbench](https://packages.tools/testbench) to run `php artisan manifest:list` and `manifest:check` against your package:
+
+```bash
+vendor/bin/testbench manifest:list
+```
+
+# 7. Document for app developers
+
+Tell them, in your docs:
+
+- to add the Vite plugin, if your package has no `dist`,
+- to run `php artisan manifest:check`,
+- the asset names, so they can place them with `@manifestScripts('filters')` or require them in their own views,
+- the Inertia page names, if you ship pages,
+- which files are meant to be overridden.

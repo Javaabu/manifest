@@ -1,0 +1,11 @@
+{
+    "position": 1.32,
+    "label": "Advanced Usage",
+    "collapsible": true,
+    "collapsed": true,
+    "link": {
+        "type": "generated-index",
+        "slug": "/manifest/_categories/advanced-usage",
+        "description": "Building packages, prebuilt assets, TypeScript, testing, configuration and the full API."
+    }
+}
