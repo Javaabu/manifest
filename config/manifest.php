@@ -16,4 +16,17 @@ return [
 
     'inject' => true,
 
+    /*
+    |--------------------------------------------------------------------------
+    | Overrides
+    |--------------------------------------------------------------------------
+    |
+    | Apps override a package's resources file by file: a file at
+    | {overrides_path}/{package}/js/FilterBar.tsx is used instead of the
+    | package's resources/js/FilterBar.tsx. Defaults to resources/vendor.
+    |
+    */
+
+    'overrides_path' => null,
+
 ];
