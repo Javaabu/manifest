@@ -13,3 +13,4 @@ clover.xml
 /tests/e2e/app/public/build
 /tests/e2e/app/public/hot
 /tests/e2e/app/bootstrap/cache/*.json
+/tests/Fixtures/app/public/hot

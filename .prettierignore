@@ -1,0 +1,13 @@
+dist
+coverage
+vendor
+node_modules
+pnpm-lock.yaml
+CHANGELOG.md
+composer.lock
+tests/Fixtures/app/vendor
+tests/Fixtures/app/public
+tests/Fixtures/app/bootstrap
+tests/Fixtures/app/storage
+*.php
+*.md

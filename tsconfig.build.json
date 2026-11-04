@@ -1,0 +1,12 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "noEmit": false,
+        "declaration": true,
+        "outDir": "dist",
+        "rootDir": "js/src",
+        "types": ["node", "vite/client"]
+    },
+    "include": ["js/src"],
+    "exclude": ["js/src/**/*.test.ts"]
+}

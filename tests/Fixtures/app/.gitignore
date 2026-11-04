@@ -1,3 +1,4 @@
 /public/hot
 /public/build
+/public/e2e-*
 /resources/vendor

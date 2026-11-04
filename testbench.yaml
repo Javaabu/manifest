@@ -1,0 +1,12 @@
+# For `vendor/bin/testbench`: runs artisan in the fixture app the tests use,
+# with the fixture packages installed. The e2e Vite build runs
+# `vendor/bin/testbench manifest:discover` through the plugin.
+laravel: ./tests/Fixtures/app
+
+providers:
+    - Acme\Widgets\WidgetsServiceProvider
+    - Javaabu\Manifest\ManifestServiceProvider
+    - Acme\Filters\FiltersServiceProvider
+
+dont-discover:
+    - "*"
