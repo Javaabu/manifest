@@ -2,11 +2,15 @@
 
 namespace Javaabu\Manifest;
 
+use Illuminate\Console\Events\CommandFinished;
 use Illuminate\Contracts\Http\Kernel as HttpKernel;
 use Illuminate\Foundation\Http\Kernel;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Process;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\View\Component;
+use Javaabu\Manifest\Commands\DiscoverCommand;
 use Javaabu\Manifest\Commands\ListCommand;
 use Javaabu\Manifest\Http\Middleware\InjectAssets;
 
@@ -33,8 +37,11 @@ class ManifestServiceProvider extends ServiceProvider
         }
 
         $this->commands([
+            DiscoverCommand::class,
             ListCommand::class,
         ]);
+
+        $this->rediscoverAfterPackageDiscovery();
 
         $this->publishes([
             __DIR__ . '/../config/manifest.php' => config_path('manifest.php'),
@@ -62,6 +69,22 @@ class ManifestServiceProvider extends ServiceProvider
                 '<?php app(\\Javaabu\\Manifest\\Manifest::class)->requireFor($component); ?>' . "\n" . '<?php $component->withAttributes(',
                 $value,
             );
+        });
+    }
+
+    /**
+     * Laravel apps run package:discover on every composer install, update and
+     * dump-autoload. The new packages' providers aren't loaded in that
+     * process, so manifest:discover runs in a fresh one.
+     */
+    protected function rediscoverAfterPackageDiscovery(): void
+    {
+        Event::listen(CommandFinished::class, function (CommandFinished $event) {
+            if ($event->command !== 'package:discover' || $event->exitCode !== 0) {
+                return;
+            }
+
+            Process::path($this->app->basePath())->run([PHP_BINARY, 'artisan', 'manifest:discover']);
         });
     }
 

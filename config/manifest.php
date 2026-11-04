@@ -29,4 +29,18 @@ return [
 
     'overrides_path' => null,
 
+    /*
+    |--------------------------------------------------------------------------
+    | Discovery file
+    |--------------------------------------------------------------------------
+    |
+    | php artisan manifest:discover writes the registered packages and assets
+    | here for the Vite plugin. It runs again after package:discover (so on
+    | composer install and dump-autoload) and when Vite starts. Defaults to
+    | bootstrap/cache/manifest.json.
+    |
+    */
+
+    'discovery_path' => null,
+
 ];

@@ -19,6 +19,9 @@ class Manifest
     /** @var array<class-string, array<int, string>> */
     protected array $class_requirements = [];
 
+    /** @var array<string, string>|null real path => vendor/{name} */
+    protected ?array $vendor_links = null;
+
     public function __construct(
         protected Application $app,
     ) {}
@@ -265,20 +268,105 @@ class Manifest
 
     /**
      * A path relative to the app's root, as Vite inputs and the Vite
-     * manifest expect.
+     * manifest expect. Packages installed from a Composer path repository
+     * are symlinked into vendor/, so their real paths map back to vendor/.
      */
     public function relativeToBase(string $path): string
     {
-        $base = rtrim($this->app->basePath(), '/\\') . '/';
+        $base = $this->normalizePath($this->app->basePath()) . '/';
 
-        $path = str_replace('\\', '/', $path);
-        $base = str_replace('\\', '/', $base);
+        $path = $this->normalizePath($path);
 
         if (str_starts_with($path, $base)) {
             return substr($path, strlen($base));
         }
 
+        foreach ($this->vendorLinks() as $real => $link) {
+            if ($path === $real || str_starts_with($path, "{$real}/")) {
+                return $link . substr($path, strlen($real));
+            }
+        }
+
         return $path;
+    }
+
+    /**
+     * What the Vite plugin reads (php artisan manifest:discover).
+     *
+     * @return array<string, mixed>
+     */
+    public function toDiscoveryArray(): array
+    {
+        $packages = [];
+
+        foreach ($this->packages as $name => $package) {
+            $packages[$name] = [
+                'path' => $this->relativeToBase($package->path()),
+                'alias' => $package->importAlias(),
+                'js' => $package->jsPath(),
+                'pages' => $package->pagesPath(),
+                'dist' => $package->distPath(),
+                'overrides' => $this->relativeToBase($this->overridePath($name)),
+                'dependencies' => (object) $package->npmDependencies(),
+                'peerDependencies' => (object) $package->npmPeerDependencies(),
+            ];
+        }
+
+        $assets = array_map(fn (Asset $asset) => [
+            'id' => $asset->id(),
+            'package' => $asset->package,
+            'name' => $asset->name,
+            'type' => $asset->type->value,
+            'entry' => $asset->entry,
+            'input' => $this->relativeToBase($this->entryPath($asset)),
+            'dependencies' => $asset->dependencies,
+        ], $this->all());
+
+        return [
+            'version' => 1,
+            'packages' => (object) $packages,
+            'assets' => $assets,
+        ];
+    }
+
+    protected function normalizePath(string $path): string
+    {
+        return rtrim(str_replace('\\', '/', $path), '/');
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function vendorLinks(): array
+    {
+        if ($this->vendor_links !== null) {
+            return $this->vendor_links;
+        }
+
+        $this->vendor_links = [];
+
+        $installed = $this->app->basePath('vendor/composer/installed.json');
+
+        if (! is_file($installed)) {
+            return $this->vendor_links;
+        }
+
+        $data = json_decode((string) file_get_contents($installed), true);
+
+        foreach ($data['packages'] ?? $data ?? [] as $package) {
+            if (($package['dist']['type'] ?? null) !== 'path' || empty($package['name'])) {
+                continue;
+            }
+
+            $link = "vendor/{$package['name']}";
+            $real = realpath($this->app->basePath($link));
+
+            if ($real) {
+                $this->vendor_links[$this->normalizePath($real)] = $link;
+            }
+        }
+
+        return $this->vendor_links;
     }
 
     /**
