@@ -140,6 +140,8 @@ describe("vite dev server", () => {
 
         // laravel-vite-plugin skips its dev server hooks (the hot file) under Vitest.
         delete process.env.VITEST
+    // ...and refuses to start a dev server in CI.
+    process.env.LARAVEL_BYPASS_ENV_CHECK = "1"
 
         server = await createServer(fixtureConfig({ server: { port: 0, host: "127.0.0.1" } }))
         await server.listen()
