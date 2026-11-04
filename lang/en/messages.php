@@ -13,4 +13,10 @@ return [
     'discover' => [
         'written' => '{0} Wrote :path (no packages have registered assets).|{1} Wrote :count package to :path.|[2,*] Wrote :count packages to :path.',
     ],
+    'override' => [
+        'path_required' => 'Give the path of the file to override, relative to the package\'s resources folder.',
+        'missing' => 'There is no :path to override.',
+        'exists' => ':path already exists. Use --force to overwrite it.',
+        'copied' => 'Copied to :path. Edit it there; it is used instead of the package\'s copy.',
+    ],
 ];

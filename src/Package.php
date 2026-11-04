@@ -237,6 +237,35 @@ class Package
         return $this->dist_path;
     }
 
+    /**
+     * The top-level folders of resources/ that hold this package's assets,
+     * which publishing copies: the JS folder and every entry's folder.
+     *
+     * @return array<int, string>
+     */
+    public function assetFolders(): array
+    {
+        $paths = array_map(fn (Asset $asset) => $asset->entry, $this->assets);
+
+        foreach ([$this->js_path, $this->pages_path] as $path) {
+            if ($path) {
+                $paths[] = "{$path}/";
+            }
+        }
+
+        $folders = [];
+
+        foreach ($paths as $path) {
+            $segments = explode('/', $path);
+
+            if (count($segments) > 1 && $segments[0] !== '' && $segments[0] !== '..') {
+                $folders[$segments[0]] = true;
+            }
+        }
+
+        return array_keys($folders);
+    }
+
     /** @return array<string, string> */
     public function npmDependencies(): array
     {

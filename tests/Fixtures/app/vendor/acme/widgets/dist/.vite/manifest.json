@@ -1,0 +1,22 @@
+{
+  "css/theme.scss": {
+    "file": "assets/theme-D1st0001.css",
+    "src": "css/theme.scss",
+    "isEntry": true,
+    "names": ["theme.css"]
+  },
+  "js/core.js": {
+    "file": "assets/core-D1st0002.js",
+    "name": "core",
+    "src": "js/core.js",
+    "isEntry": true
+  },
+  "js/chart.ts": {
+    "file": "assets/chart-D1st0003.js",
+    "name": "chart",
+    "src": "js/chart.ts",
+    "isEntry": true,
+    "imports": ["js/core.js"],
+    "css": ["assets/chart-D1st0004.css"]
+  }
+}

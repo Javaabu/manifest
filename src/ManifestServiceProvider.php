@@ -8,10 +8,13 @@ use Illuminate\Foundation\Http\Kernel;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Process;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\View\Component;
 use Javaabu\Manifest\Commands\DiscoverCommand;
 use Javaabu\Manifest\Commands\ListCommand;
+use Javaabu\Manifest\Commands\OverrideCommand;
+use Javaabu\Manifest\Http\Controllers\DistAssetsController;
 use Javaabu\Manifest\Http\Middleware\InjectAssets;
 
 class ManifestServiceProvider extends ServiceProvider
@@ -31,6 +34,7 @@ class ManifestServiceProvider extends ServiceProvider
         $this->registerComponentHook();
         $this->registerDirectives();
         $this->registerMiddleware();
+        $this->registerDistRoute();
 
         if (! $this->app->runningInConsole()) {
             return;
@@ -39,9 +43,12 @@ class ManifestServiceProvider extends ServiceProvider
         $this->commands([
             DiscoverCommand::class,
             ListCommand::class,
+            OverrideCommand::class,
         ]);
 
         $this->rediscoverAfterPackageDiscovery();
+
+        $this->app->booted(fn () => $this->registerPackagePublishing());
 
         $this->publishes([
             __DIR__ . '/../config/manifest.php' => config_path('manifest.php'),
@@ -86,6 +93,47 @@ class ManifestServiceProvider extends ServiceProvider
 
             Process::path($this->app->basePath())->run([PHP_BINARY, 'artisan', 'manifest:discover']);
         });
+    }
+
+    /**
+     * Packages register in boot(), so their publishing is declared once
+     * everything has booted.
+     */
+    protected function registerPackagePublishing(): void
+    {
+        $manifest = $this->app->make(Manifest::class);
+
+        foreach ($manifest->packages() as $name => $package) {
+            $assets = [];
+
+            foreach ($package->assetFolders() as $folder) {
+                $assets[$package->path($folder)] = $manifest->overridePath($name, $folder);
+            }
+
+            if ($assets) {
+                $this->publishes($assets, ['manifest-assets', "manifest-assets-{$name}"]);
+            }
+
+            if ($dist = $manifest->distPath($name)) {
+                $this->publishes([
+                    $dist => public_path($manifest->distUrlPath($name)),
+                ], ['manifest-dist', "manifest-dist-{$name}"]);
+            }
+        }
+    }
+
+    protected function registerDistRoute(): void
+    {
+        if ($this->app->routesAreCached()) {
+            return;
+        }
+
+        $base = trim((string) (config('manifest.dist_url') ?? 'vendor/manifest'), '/');
+
+        Route::get("{$base}/{package}/{path}", DistAssetsController::class)
+            ->where('package', '[a-z0-9][a-z0-9-]*')
+            ->where('path', '.+')
+            ->name('manifest.dist');
     }
 
     protected function registerDirectives(): void

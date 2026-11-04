@@ -43,4 +43,23 @@ return [
 
     'discovery_path' => null,
 
+    /*
+    |--------------------------------------------------------------------------
+    | Prebuilt assets
+    |--------------------------------------------------------------------------
+    |
+    | Packages can ship prebuilt assets (->dist()) for apps that don't build
+    | them with Vite. "auto" uses them for assets missing from the app's Vite
+    | build, "always" uses them whenever a package has them, and "never"
+    | always uses the app's Vite. Overridden assets always use the app's Vite.
+    |
+    | They're served from /{dist_url}/{package}: from public/ once published
+    | (vendor:publish --tag=manifest-dist), through a cached route until then.
+    |
+    */
+
+    'dist' => 'auto',
+
+    'dist_url' => 'vendor/manifest',
+
 ];

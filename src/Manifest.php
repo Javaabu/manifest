@@ -261,6 +261,35 @@ class Manifest
         return $this->resolvePath($asset->package, $asset->entry);
     }
 
+    /**
+     * The real path of a package's prebuilt dist folder, if it has one.
+     */
+    public function distPath(string $package): ?string
+    {
+        if (! isset($this->packages[$package])) {
+            return null;
+        }
+
+        $dist = $this->packages[$package]->distPath();
+
+        if (! $dist) {
+            return null;
+        }
+
+        return realpath($this->packages[$package]->path($dist)) ?: null;
+    }
+
+    /**
+     * The URL path a package's prebuilt files are served from, and published to
+     * under public/.
+     */
+    public function distUrlPath(string $package): string
+    {
+        $base = trim((string) (config('manifest.dist_url') ?? 'vendor/manifest'), '/');
+
+        return "{$base}/{$package}";
+    }
+
     public function isOverridden(Asset $asset): bool
     {
         return is_file($this->overridePath($asset->package, $asset->entry));

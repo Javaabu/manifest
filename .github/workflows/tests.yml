@@ -92,46 +92,46 @@ jobs:
         name: Vite plugin and end-to-end build
 
         steps:
-            -   uses: actions/checkout@v5
+            - uses: actions/checkout@v5
 
-            -   name: Setup PHP
-                uses: shivammathur/setup-php@v2
-                with:
-                    php-version: '8.4'
-                    coverage: none
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: "8.4"
+                  coverage: none
 
-            -   name: Install Composer dependencies
-                run: composer update --prefer-dist --no-interaction
+            - name: Install Composer dependencies
+              run: composer update --prefer-dist --no-interaction
 
-            -   uses: pnpm/action-setup@v4
+            - uses: pnpm/action-setup@v4
 
-            -   uses: actions/setup-node@v5
-                with:
-                    node-version: 22
-                    cache: pnpm
+            - uses: actions/setup-node@v5
+              with:
+                  node-version: 22
+                  cache: pnpm
 
-            -   name: Install npm dependencies
-                run: pnpm install --frozen-lockfile
+            - name: Install npm dependencies
+              run: pnpm install --frozen-lockfile
 
-            -   run: pnpm lint
-            -   run: pnpm format:check
-            -   run: pnpm typecheck
+            - run: pnpm lint
+            - run: pnpm format:check
+            - run: pnpm typecheck
 
-            -   name: Check that the committed dist is up to date
-                run: |
-                    pnpm build
-                    git diff --exit-code -- dist || (echo "dist is out of date: run pnpm build and commit it." && exit 1)
+            - name: Check that the committed dist is up to date
+              run: |
+                  pnpm build
+                  git diff --exit-code -- dist || (echo "dist is out of date: run pnpm build and commit it." && exit 1)
 
-            -   name: Unit and end-to-end tests with coverage
-                run: pnpm test:coverage
+            - name: Unit and end-to-end tests with coverage
+              run: pnpm test:coverage
 
-            -   name: Upload coverage
-                uses: codecov/codecov-action@v5
-                with:
-                    files: coverage/lcov.info
-                    flags: js
-                    token: ${{ secrets.CODECOV_TOKEN }}
-                    fail_ci_if_error: false
+            - name: Upload coverage
+              uses: codecov/codecov-action@v5
+              with:
+                  files: coverage/lcov.info
+                  flags: js
+                  token: ${{ secrets.CODECOV_TOKEN }}
+                  fail_ci_if_error: false
 
-            -   name: Render pages against the end-to-end build
-                run: vendor/bin/phpunit --group e2e
+            - name: Render pages against the end-to-end build
+              run: vendor/bin/phpunit --group e2e

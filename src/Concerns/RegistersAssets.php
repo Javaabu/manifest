@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Support\ServiceProvider;
 use Javaabu\Manifest\Manifest;
 use Javaabu\Manifest\Package;
+use WeakMap;
 
 /**
  * For package service providers. Works from register() or boot(), whatever
@@ -22,7 +23,15 @@ trait RegistersAssets
      */
     protected function registerAssets(string $name, string $path, Closure $callback): void
     {
-        $this->callAfterResolving(Manifest::class, function (Manifest $manifest) use ($name, $path, $callback) {
+        $registered = new WeakMap;
+
+        $this->callAfterResolving(Manifest::class, function (Manifest $manifest) use ($name, $path, $callback, $registered) {
+            if (isset($registered[$manifest])) {
+                return;
+            }
+
+            $registered[$manifest] = true;
+
             $callback($manifest->package($name, $path));
         });
     }
