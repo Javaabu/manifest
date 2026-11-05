@@ -23,8 +23,10 @@ class InertiaTest extends TestCase
 
     protected function defineEnvironment($app): void
     {
-        // v3 reads inertia.pages, v2 inertia.testing.
+        // v3 reads inertia.pages.paths; v2 reads inertia.testing.page_paths
+        // and (from v2.0.20 or so) inertia.page_paths.
         $app['config']->set('inertia.pages.paths', [resource_path('js/pages')]);
+        $app['config']->set('inertia.page_paths', [resource_path('js/pages')]);
         $app['config']->set('inertia.testing.page_paths', [resource_path('js/pages')]);
     }
 

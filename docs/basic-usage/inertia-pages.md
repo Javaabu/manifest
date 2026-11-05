@@ -139,4 +139,4 @@ $this->get('/reports/1')
         ->where('report.title', 'ރިޕޯޓް'));
 ```
 
-The check uses the page extensions from inertia-laravel's config: `inertia.pages.extensions` on v3, `inertia.testing.page_extensions` on v2. An app's override of a package page is found first.
+The check uses the page extensions from inertia-laravel's config (`inertia.pages.extensions` on v3). An app's override of a package page is found first.
