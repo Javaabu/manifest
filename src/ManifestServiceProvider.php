@@ -129,25 +129,34 @@ class ManifestServiceProvider extends ServiceProvider
     }
 
     /**
-     * inertia-laravel checks that a page exists in assertInertia() with a view
-     * finder, which understands package::Page as a namespace.
+     * inertia-laravel checks that a page exists (in assertInertia(), and when
+     * rendering with `inertia.pages.ensure_pages_exist`) with a view finder,
+     * which understands package::Page as a namespace. v2 binds it as
+     * `inertia.testing.view-finder` and v3 as `inertia.view-finder`.
      */
     protected function registerInertiaTestingPages(): void
     {
-        $this->app->afterResolving('inertia.testing.view-finder', function (FileViewFinder $finder) {
-            $manifest = $this->app->make(Manifest::class);
+        foreach (['inertia.view-finder', 'inertia.testing.view-finder'] as $binding) {
+            $this->app->afterResolving($binding, function (FileViewFinder $finder) {
+                $this->registerPackagePages($finder);
+            });
+        }
+    }
 
-            foreach ($manifest->packages() as $name => $package) {
-                if (! $package->pagesPath()) {
-                    continue;
-                }
+    protected function registerPackagePages(FileViewFinder $finder): void
+    {
+        $manifest = $this->app->make(Manifest::class);
 
-                $finder->replaceNamespace($name, [
-                    $manifest->overridePath($name, $package->pagesPath()),
-                    $package->path($package->pagesPath()),
-                ]);
+        foreach ($manifest->packages() as $name => $package) {
+            if (! $package->pagesPath()) {
+                continue;
             }
-        });
+
+            $finder->replaceNamespace($name, [
+                $manifest->overridePath($name, $package->pagesPath()),
+                $package->path($package->pagesPath()),
+            ]);
+        }
     }
 
     protected function registerDistRoute(): void

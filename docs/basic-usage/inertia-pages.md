@@ -130,7 +130,7 @@ It's at `resources/vendor/filters/js/Pages/Reports/Show.tsx`, and it wins. Its r
 
 # Testing
 
-inertia-laravel checks that a page exists in `assertInertia()`. The package registers its pages with that check, so package pages pass it:
+inertia-laravel checks that a page exists in `assertInertia()`, and on v3 also when rendering if `inertia.pages.ensure_pages_exist` is on. The package registers its pages with that check on inertia-laravel v2 and v3, so package pages pass it with no setup in your tests:
 
 ```php
 $this->get('/reports/1')
@@ -139,4 +139,4 @@ $this->get('/reports/1')
         ->where('report.title', 'ރިޕޯޓް'));
 ```
 
-The check uses `inertia.testing.page_extensions` from inertia-laravel's config.
+The check uses the page extensions from inertia-laravel's config: `inertia.pages.extensions` on v3, `inertia.testing.page_extensions` on v2. An app's override of a package page is found first.

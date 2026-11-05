@@ -14,3 +14,4 @@ Initial development of v1.0:
 - `manifest:list`, `manifest:check`, `manifest:discover`, `manifest:types` and `manifest:override`, in English and Dhivehi.
 - `packageBuild()`, a Vite preset for building a package's dist.
 - `Manifest::fake()` with assertions for tests.
+- `assertInertia()` finds package pages on inertia-laravel v3 as well as v2 (#15).
