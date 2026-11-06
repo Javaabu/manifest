@@ -31,7 +31,7 @@ Paths are relative to this file. In an app, that's vendor/javaabu/manifest/.
 - [Building a package](docs/advanced-usage/building-a-package.md): the checklist and reference packages for package authors
 - [Prebuilt assets](docs/advanced-usage/prebuilt-assets.md): dist, packageBuild(), serving and publishing
 - [TypeScript](docs/advanced-usage/typescript.md): manifest:types, import paths, page types
-- [Testing](docs/advanced-usage/testing.md): Manifest::fake() and its assertions
+- [Testing](docs/advanced-usage/testing.md): Manifest::fake() and its assertions, view assertions
 - [Configuration](docs/advanced-usage/configuration.md): every option
 - [Commands](docs/advanced-usage/commands.md): every artisan command and publishing tag
 - [API reference](docs/advanced-usage/api-reference.md): every PHP and JS class, method and export

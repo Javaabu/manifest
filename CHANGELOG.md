@@ -15,3 +15,4 @@ Initial development of v1.0:
 - `packageBuild()`, a Vite preset for building a package's dist.
 - `Manifest::fake()` with assertions for tests.
 - `assertInertia()` finds package pages on inertia-laravel v3 as well as v2 (#15).
+- Injecting assets keeps the response's view, so `assertViewIs()` and `assertViewHas()` work in Blade apps (#16).

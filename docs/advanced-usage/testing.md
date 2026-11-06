@@ -57,6 +57,16 @@ The fake's tags look like this, with the entry path relative to the app:
 
 Without the fake, tags come from Laravel's `Vite`. In tests you can use Laravel's `$this->withoutVite()`, which prints no tags, or write a `public/build/manifest.json` for the test.
 
+# View assertions
+
+Injection keeps the response's view, so `assertViewIs()`, `assertViewHas()` and `viewData()` work on pages that had assets injected:
+
+```php
+$this->get('/reports')
+    ->assertViewIs('filters::reports.index')
+    ->assertViewHas('title', 'ރިޕޯޓުތައް');
+```
+
 # Inertia pages
 
 `assertInertia()->component('filters::Index')` finds package pages. See [Inertia pages](../basic-usage/inertia-pages#testing).

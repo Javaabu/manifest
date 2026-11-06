@@ -26,10 +26,16 @@ class InjectAssets
 
         try {
             if ($this->shouldInject($request, $response)) {
+                // setContent() replaces the original (the view) with the string,
+                // which would break assertViewIs() and other view assertions.
+                $original = $response->original;
+
                 $response->setContent($this->injector->inject(
                     $response->getContent(),
                     auto: (bool) config('manifest.inject'),
                 ));
+
+                $response->original = $original;
 
                 $response->headers->remove('Content-Length');
             }

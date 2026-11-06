@@ -17,7 +17,7 @@ Blade class components are hooked in two places: a container `afterResolving` ca
 
 # Rendering
 
-`@manifestStyles` and `@manifestScripts` print placeholders (`<!--[manifest:styles:*]-->`). The `InjectAssets` middleware is pushed onto the global middleware stack. After the response is built, it fills the placeholders: scoped ones first, in document order, then catch-alls. With `inject` on, it puts what's left before `</head>` and `</body>`. Because it's middleware, rendering errors (an unknown asset, a missing Vite manifest) go through the exception handler like any other error.
+`@manifestStyles` and `@manifestScripts` print placeholders (`<!--[manifest:styles:*]-->`). The `InjectAssets` middleware is pushed onto the global middleware stack. After the response is built, it fills the placeholders: scoped ones first, in document order, then catch-alls. With `inject` on, it puts what's left before `</head>` and `</body>`. It keeps the response's original view, so Laravel's view assertions still work. Because it's middleware, rendering errors (an unknown asset, a missing Vite manifest) go through the exception handler like any other error.
 
 Each batch of tags is printed by a clone of the app's `Illuminate\Foundation\Vite`, with each asset's entry path relative to the app root as the entrypoint. That's what Vite's build manifest is keyed by. Prebuilt assets use `DistVite`, a subclass that reads the package's own manifest and copies the app's Vite settings.
 

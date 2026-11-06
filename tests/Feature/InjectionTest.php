@@ -16,7 +16,7 @@ class InjectionTest extends TestCase
 
     protected function defineRoutes($router): void
     {
-        $router->get('/auto', fn () => view('auto'));
+        $router->get('/auto', fn () => view('auto', ['title' => 'ފިލްޓަރުތައް']));
         $router->get('/plain', fn () => view('plain'));
         $router->get('/fragment', fn () => view('fragment'));
         $router->get('/json', function () {
@@ -68,6 +68,21 @@ class InjectionTest extends TestCase
         $this->assertStringContainsString('src="http://localhost/build/assets/filters-filter-bar-abc123.js"', $body);
         $this->assertStringContainsString('src="http://localhost/build/assets/widgets-chart-abc123.js"', $body);
         $this->assertStringNotContainsString('rel="stylesheet"', $body);
+    }
+
+    #[Test]
+    public function it_keeps_the_view_so_view_assertions_still_work(): void
+    {
+        $this->useViteBuild();
+
+        $response = $this->get('/auto')->assertOk();
+
+        $this->assertStringContainsString('filters-filter-bar-abc123.js', $response->getContent());
+
+        $response->assertViewIs('auto')
+            ->assertViewHas('title', 'ފިލްޓަރުތައް');
+
+        $this->assertEquals('ފިލްޓަރުތައް', $response->viewData('title'));
     }
 
     #[Test]
