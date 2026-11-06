@@ -25,10 +25,10 @@ Paths are relative to this file. In an app, that's vendor/javaabu/manifest/.
 - [Installation & Setup](docs/installation-and-setup.md): the Vite plugin, Inertia, TypeScript, config file
 - [Registering assets](docs/basic-usage/registering-assets.md): the Package API, types, dependencies, aliases, pages, npm, dist, manifest:list
 - [Loading assets in Blade](docs/basic-usage/loading-assets.md): RequiresAssets, DeclaresAssets, @manifestRequire, injection, directives, CSP
-- [Vite](docs/basic-usage/vite.md): the plugin, its options, discovery, Docker, path repositories
+- [Vite](docs/basic-usage/vite.md): the plugin, its options (including packages' Vite plugins), discovery, Docker, path repositories
 - [Inertia pages](docs/basic-usage/inertia-pages.md): package pages, resolvePage() for React and Vue, testing
 - [Overriding assets](docs/basic-usage/overriding-assets.md): single-file overrides, publishing, resolution order
-- [Building a package](docs/advanced-usage/building-a-package.md): the checklist and reference packages for package authors
+- [Building a package](docs/advanced-usage/building-a-package.md): the checklist and reference packages for package authors, and shipping a Vite plugin `manifest()` runs (`->vitePlugin()`)
 - [Prebuilt assets](docs/advanced-usage/prebuilt-assets.md): dist, packageBuild(), serving and publishing
 - [TypeScript](docs/advanced-usage/typescript.md): manifest:types, import paths, page types
 - [Testing](docs/advanced-usage/testing.md): Manifest::fake() and its assertions, view assertions

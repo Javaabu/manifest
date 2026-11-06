@@ -1,7 +1,7 @@
 import fs from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
-import { searchForWorkspaceRoot, type Plugin, type ResolvedConfig } from "vite"
+import { searchForWorkspaceRoot, type Plugin, type PluginOption, type ResolvedConfig } from "vite"
 import {
   DEFAULT_DISCOVER_COMMAND,
   DEFAULT_DISCOVERY_PATH,
@@ -13,6 +13,14 @@ import {
   type ResolvedPackage,
 } from "./discovery.js"
 import { PAGES_MODULE_ID, RESOLVED_PAGES_MODULE_ID, pagesModule } from "./pages.js"
+import {
+  lazy,
+  loadPackagePlugin,
+  selectPackagePlugins,
+  unknownPluginSettings,
+  type LoadedPackagePlugin,
+  type PackagePluginSettings,
+} from "./plugins.js"
 import { applyOverride, isBareImport, isRelativeImport, matchAlias, ownerOf } from "./resolution.js"
 
 export interface ManifestPluginOptions {
@@ -37,12 +45,33 @@ export interface ManifestPluginOptions {
    * @default true
    */
   input?: boolean
+
+  /**
+   * The Vite plugins packages register (`->vitePlugin()`), by package name:
+   * `false` doesn't run that package's plugins, and an object is merged over
+   * the options the package registered.
+   * @default {}
+   */
+  plugins?: PackagePluginSettings
 }
 
 export interface ManifestPlugin extends Plugin {
   /** The discovered packages, once Vite has resolved its config. */
   packages(): ResolvedPackage[]
   /** Every registered asset's entry (overrides applied), relative to the Vite root. */
+  inputs(): string[]
+  /** Imports and runs the packages' Vite plugins (once). */
+  packagePlugins(): Promise<LoadedPackagePlugin[]>
+}
+
+/**
+ * What `manifest()` returns: manifest's own plugin, then the packages' Vite
+ * plugins. Vite flattens it; `packages()` and `inputs()` work on it too.
+ */
+export interface ManifestPlugins extends Array<PluginOption> {
+  /** manifest's own plugin. */
+  plugin: ManifestPlugin
+  packages(): ResolvedPackage[]
   inputs(): string[]
 }
 
@@ -197,17 +226,29 @@ export function rewriteManifestKeys(
 }
 
 /**
- * Builds the assets Laravel packages register with javaabu/manifest. Use it
- * next to laravel-vite-plugin:
+ * Builds the assets Laravel packages register with javaabu/manifest, and runs
+ * the Vite plugins they register. Use it next to laravel-vite-plugin:
  *
  *     plugins: [laravel({ input: ["resources/js/app.ts"] }), manifest()]
  */
-export default function manifest(options: ManifestPluginOptions = {}): ManifestPlugin {
+export default function manifest(options: ManifestPluginOptions = {}): ManifestPlugins {
+  const plugin = manifestPlugin(options)
+  const packagePlugins = lazy(async () => (await plugin.packagePlugins()).flatMap((loaded) => loaded.plugins))
+
+  return Object.assign([plugin, packagePlugins] as PluginOption[], {
+    plugin,
+    packages: () => plugin.packages(),
+    inputs: () => plugin.inputs(),
+  })
+}
+
+function manifestPlugin(options: ManifestPluginOptions): ManifestPlugin {
   let root = process.cwd()
   let discovery: Discovery = { version: 1, packages: {}, assets: [] }
   let packages: ResolvedPackage[] = []
   let config: ResolvedConfig | undefined
   let loaded = false
+  let loadedPlugins: Promise<LoadedPackagePlugin[]> | undefined
   const pending: string[] = []
 
   const load = (from: string) => {
@@ -222,6 +263,20 @@ export default function manifest(options: ManifestPluginOptions = {}): ManifestP
     enforce: "pre",
 
     packages: () => packages,
+
+    packagePlugins() {
+      // Vite awaits this while it flattens the config's plugins, before any
+      // hook runs: discover now, from where Vite runs.
+      if (!loaded) {
+        load(process.cwd())
+      }
+
+      loadedPlugins ??= Promise.all(
+        selectPackagePlugins(packages, options.plugins).map((registered) => loadPackagePlugin(registered, root)),
+      )
+
+      return loadedPlugins
+    },
 
     inputs() {
       // Called from vite.config.js before Vite runs the plugin: discover now.
@@ -252,11 +307,27 @@ export default function manifest(options: ManifestPluginOptions = {}): ManifestP
       }
     },
 
-    configResolved(resolved) {
+    async configResolved(resolved) {
       config = resolved
 
       for (const message of pending.splice(0)) {
         resolved.logger.warn(message)
+      }
+
+      for (const name of unknownPluginSettings(packages, options.plugins)) {
+        resolved.logger.warn(
+          `[javaabu/manifest] The "plugins" option names "${name}", but no package by that name registers a Vite plugin.`,
+        )
+      }
+
+      for (const { plugin: registered, plugins } of loadedPlugins ? await loadedPlugins : []) {
+        for (const name of new Set(plugins.map((added) => added.name))) {
+          if ((resolved.plugins ?? []).filter((other) => other.name === name).length > 1) {
+            resolved.logger.warn(
+              `[javaabu/manifest] The ${registered.package} package's Vite plugin "${name}" runs twice: manifest() adds it, and so does vite.config.js. Remove it from vite.config.js, or pass manifest({ plugins: { "${registered.package}": false } }).`,
+            )
+          }
+        }
       }
 
       for (const pkg of packages) {
@@ -370,4 +441,12 @@ export default function manifest(options: ManifestPluginOptions = {}): ManifestP
 }
 
 export { manifest }
-export type { Discovery, DiscoveredAsset, DiscoveredPackage, ResolvedPackage } from "./discovery.js"
+export type {
+  Discovery,
+  DiscoveredAsset,
+  DiscoveredPackage,
+  DiscoveredVitePlugin,
+  PackageVitePlugin,
+  ResolvedPackage,
+} from "./discovery.js"
+export type { LoadedPackagePlugin, PackagePluginSettings } from "./plugins.js"

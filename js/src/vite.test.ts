@@ -145,7 +145,7 @@ describe("discovery", () => {
   it("falls back to the existing file when discovery fails, with a warning", () => {
     write("bootstrap/cache/manifest.json", JSON.stringify(discovery))
 
-    const plugin = manifest({ discover: "exit 1" })
+    const plugin = manifest({ discover: "exit 1" }).plugin
     const warn = vi.fn()
 
     ;(plugin.config as (config: object) => unknown)({ root })
@@ -157,7 +157,7 @@ describe("discovery", () => {
   })
 
   it("fails when discovery fails and there's nothing to fall back to", () => {
-    const plugin = manifest({ discover: "exit 1" })
+    const plugin = manifest({ discover: "exit 1" }).plugin
 
     expect(() => (plugin.config as (config: object) => unknown)({ root })).toThrow("there's no")
   })
@@ -165,7 +165,7 @@ describe("discovery", () => {
   it("only reads the file when discovery is off", () => {
     write("custom.json", JSON.stringify(discovery))
 
-    const plugin = manifest({ discover: false, discovery: "custom.json" })
+    const plugin = manifest({ discover: false, discovery: "custom.json" }).plugin
 
     ;(plugin.config as (config: object) => unknown)({ root })
 
@@ -180,7 +180,7 @@ describe("discovery", () => {
     process.chdir(root)
 
     try {
-      const plugin = manifest({ discover: false, discovery: "custom.json", input: false })
+      const plugin = manifest({ discover: false, discovery: "custom.json", input: false }).plugin
 
       expect(plugin.inputs()).toEqual([
         "vendor/acme/filters/resources/js/a.ts",
@@ -199,7 +199,7 @@ describe("discovery", () => {
     write("custom.json", JSON.stringify(discovery))
     write("node_modules/@javaabu/filters/package.json", "{}")
 
-    const plugin = manifest({ discover: false, discovery: "custom.json" })
+    const plugin = manifest({ discover: false, discovery: "custom.json" }).plugin
     const warn = vi.fn()
 
     ;(plugin.config as (config: object) => unknown)({ root })

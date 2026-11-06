@@ -3,7 +3,7 @@ title: Prebuilt assets
 sidebar_position: 2
 ---
 
-A package can ship its assets already built, for apps that don't build with Vite, or whose build doesn't include the package yet. Build them with the [`packageBuild()` preset](./building-a-package#5-prebuilt-assets-optional) and register the folder:
+A package can ship its assets already built, for apps that don't build with Vite, or whose build doesn't include the package yet. Build them with the [`packageBuild()` preset](./building-a-package#6-prebuilt-assets-optional) and register the folder:
 
 ```php
 $package->dist();            // resources/../dist

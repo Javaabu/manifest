@@ -40,4 +40,14 @@ class InvalidAssetException extends InvalidArgumentException
     {
         return new self("Invalid npm scope [{$scope}]. Use assets or pages.");
     }
+
+    public static function invalidVitePlugin(string $package, string $module): self
+    {
+        return new self("Invalid Vite plugin [{$module}] for package [{$package}]. Register built JavaScript (.js or .mjs) whose default export is a plugin factory.");
+    }
+
+    public static function invalidVitePluginOptions(string $package, string $module): self
+    {
+        return new self("The options of Vite plugin [{$module}] for package [{$package}] can't be written as JSON.");
+    }
 }

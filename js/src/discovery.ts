@@ -12,6 +12,21 @@ export interface DiscoveredPackage {
   overrides: string
   dependencies: Record<string, string>
   peerDependencies: Record<string, string>
+  /** Vite plugins `manifest()` runs: modules relative to `path`, and their options. */
+  vitePlugins?: DiscoveredVitePlugin[]
+}
+
+export interface DiscoveredVitePlugin {
+  module: string
+  options: Record<string, unknown>
+}
+
+/** A package's Vite plugin, with its module's absolute path. */
+export interface PackageVitePlugin {
+  package: string
+  module: string
+  file: string
+  options: Record<string, unknown>
 }
 
 export interface DiscoveredAsset {
@@ -41,6 +56,7 @@ export interface ResolvedPackage {
   alias: string | null
   pagesDir: string | null
   overridesDir: string
+  vitePlugins: PackageVitePlugin[]
   info: DiscoveredPackage
 }
 
@@ -94,6 +110,12 @@ export function resolvePackages(root: string, discovery: Discovery): ResolvedPac
       alias: info.alias,
       pagesDir: info.pages ? path.join(dir, info.pages) : null,
       overridesDir,
+      vitePlugins: (info.vitePlugins ?? []).map((plugin) => ({
+        package: name,
+        module: plugin.module,
+        file: path.join(dir, plugin.module),
+        options: plugin.options ?? {},
+      })),
       info,
     }
   })

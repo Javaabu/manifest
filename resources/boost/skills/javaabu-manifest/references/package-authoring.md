@@ -68,6 +68,17 @@ Anonymous components: `@manifestRequire('filters::chart')` at the top of the vie
 - Inertia pages live in `resources/js/Pages/**` with a default export. `Pages/Reports/Show.tsx` is `filters::Reports/Show`.
 - Use logical CSS (`margin-inline-start`, `ps-4`), never left/right, and `@javaabu/i18n` for strings.
 
+## A Vite plugin (optional)
+
+For build-time behaviour (virtual modules, generated files, custom HMR), register a built plugin module, relative to the resources folder; the app's `manifest()` runs it:
+
+```php
+$package->vitePlugin('../dist/vite.js', ['watch' => ['lang']]);  // default export: (options) => Plugin
+```
+
+- Built JS (`.js` with `"type": "module"` in the package's shipped `package.json`, or `.mjs`), committed. Options must be JSON-serialisable.
+- Apps don't add it to `vite.config.js`. They configure or skip it with `manifest({ plugins: { "pkg": { ... } | false } })`.
+
 ## Prebuilt dist (optional)
 
 ```js

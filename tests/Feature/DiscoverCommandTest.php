@@ -50,7 +50,12 @@ class DiscoverCommandTest extends TestCase
             'overrides' => 'resources/vendor/filters',
             'dependencies' => ['@javaabu/onu' => '^1.0', 'recharts' => '^3.0'],
             'peerDependencies' => ['react' => '^19.0', 'react-dom' => '^19.0', '@inertiajs/react' => '^2.0 || ^3.0'],
+            'vitePlugins' => [],
         ], $data['packages']['filters']);
+
+        $this->assertEquals([
+            ['module' => '../vite/plugin.mjs', 'options' => ['label' => 'ވިޖެޓު', 'theme' => 'light']],
+        ], $data['packages']['widgets']['vitePlugins']);
 
         $this->assertEquals(
             ['widgets::theme', 'widgets::core', 'widgets::chart', 'filters::styles', 'filters::filter-bar', 'filters::date-range'],

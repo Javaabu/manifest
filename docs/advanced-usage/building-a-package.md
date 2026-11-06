@@ -129,7 +129,40 @@ Write `resources/js` as if it were in the app: relative imports for your own cod
 
 Apps get the same mapping from `php artisan manifest:types`.
 
-# 5. Prebuilt assets (optional)
+# 5. A Vite plugin (optional)
+
+If your package needs build-time behaviour (virtual modules, files generated from PHP, HMR for something that isn't a module), ship a Vite plugin and register it. The app's `manifest()` runs it, so apps don't add a line to `vite.config.js` for your package:
+
+```php
+$package->vitePlugin('../dist/vite.js', ['watch' => ['lang']]);
+```
+
+- The module is relative to the folder passed to `registerAssets()`, like `dist()`. It must be **built JavaScript** (`.js` or `.mjs`), since it's imported by Node when Vite loads the app's config: commit it, as manifest commits its own `dist/`. A `.js` file needs a `package.json` with `"type": "module"` next to it or above it in your package (don't `export-ignore` it), or use `.mjs`.
+- Its default export is a factory, called with the options: a plugin, an array of plugins, or a promise of either.
+- The options must be JSON-serialisable: they go through `bootstrap/cache/manifest.json`. Apps can merge their own over them, or turn your plugin off, with `manifest({ plugins: { "your-package": { ... } | false } })`.
+- Plugins run after manifest's own plugin, in package order. They run in every Vite command, like any plugin in `vite.config.js`: use `apply` or the hooks you need.
+
+```js
+// js/src/vite.ts, built to dist/vite.js
+import type { Plugin } from "vite"
+
+export interface LocalizationPluginOptions {
+  watch?: string[]
+}
+
+export default function localization(options: LocalizationPluginOptions = {}): Plugin {
+  return {
+    name: "javaabu-localization",
+    configureServer(server) {
+      /* ... */
+    },
+  }
+}
+```
+
+Keep the factory usable on its own too (`plugins: [manifest({ plugins: { localization: false } }), localization({ ... })]`), for apps that want to configure it in code. If an app adds your plugin to `vite.config.js` as well, `manifest()` warns that it runs twice.
+
+# 6. Prebuilt assets (optional)
 
 To support apps that don't build with Vite, ship a `dist` built with the preset:
 
@@ -151,7 +184,7 @@ npx vite build   # writes dist/ and dist/.vite/manifest.json
 
 The `input` paths are the entries you register. Register the folder with `->dist()`. See [Prebuilt assets](./prebuilt-assets).
 
-# 6. Test
+# 7. Test
 
 Use [`Manifest::fake()`](./testing) in your package's tests to check what your components require without a Vite build. Use [Testbench](https://packages.tools/testbench) to run `php artisan manifest:list` and `manifest:check` against your package:
 
@@ -159,7 +192,7 @@ Use [`Manifest::fake()`](./testing) in your package's tests to check what your c
 vendor/bin/testbench manifest:list
 ```
 
-# 7. Document for app developers
+# 8. Document for app developers
 
 Tell them, in your docs:
 

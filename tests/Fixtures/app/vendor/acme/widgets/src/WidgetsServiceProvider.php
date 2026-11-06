@@ -19,6 +19,7 @@ class WidgetsServiceProvider extends ServiceProvider
                 ->script('core', 'js/core.js', depends_on: ['theme'])
                 ->vue('chart', 'js/chart.ts', depends_on: ['core'])
                 ->dist('../dist')
+                ->vitePlugin('../vite/plugin.mjs', ['label' => 'ވިޖެޓު', 'theme' => 'light'])
                 ->npm(peer_dependencies: ['vue' => '^3.5']);
         });
     }

@@ -32,6 +32,7 @@ export default defineConfig({
 - **Applies overrides.** An app's copy of a package file in `resources/vendor/{package}/...` is used wherever the package uses that file. See [Overriding assets](./overriding-assets).
 - **Shares the app's npm packages.** Bare imports in package files (`react`, `vue`, `@javaabu/onu`) resolve from the app's `node_modules`, so there's a single copy of React or Vue even when a package lives outside the app.
 - **Provides `@javaabu/manifest/inertia`** for [Inertia pages](./inertia-pages).
+- **Runs packages' Vite plugins.** Packages that need build-time behaviour register a Vite plugin, and `manifest()` runs it. You don't add one plugin per package to `vite.config.js`.
 
 # Options
 
@@ -40,6 +41,7 @@ manifest({
   discover: true,
   discovery: "bootstrap/cache/manifest.json",
   input: true,
+  plugins: {},
 })
 ```
 
@@ -47,7 +49,8 @@ manifest({
 | --- | --- | --- |
 | `discover` | `true` | Run `php artisan manifest:discover` when Vite starts. A string runs that command instead, in the Vite root, such as `"sail artisan manifest:discover"` or `"docker compose exec -T app php artisan manifest:discover"`. `false` only reads the existing file. When the command fails, the plugin falls back to the existing file with a warning, or stops with an error if there isn't one. |
 | `discovery` | `"bootstrap/cache/manifest.json"` | The discovery file, relative to the Vite root. Change it together with `manifest.discovery_path`. |
-| `input` | `true` | Add every registered asset to the build. With `false`, list them yourself: the plugin object's `inputs()` returns them. |
+| `input` | `true` | Add every registered asset to the build. With `false`, list them yourself: `inputs()` on what `manifest()` returns lists them. |
+| `plugins` | `{}` | Packages' Vite plugins, by package name: `false` doesn't run that package's plugins, and an object is merged over the options the package registered, such as `{ "js-localization": { command: "./vendor/bin/sail artisan lang:js --stdout" } }`. |
 
 ```js
 const assets = manifest({ input: false })
@@ -58,6 +61,8 @@ export default defineConfig({
 ```
 
 `inputs()` runs discovery from the current directory if Vite hasn't yet.
+
+`manifest()` returns an array: its own plugin (also at `.plugin`), then the packages' plugins. Vite flattens it, so use it as one plugin. Packages' plugins are found by running discovery from the directory Vite runs in, before Vite applies a `root` from the config.
 
 # Discovery
 

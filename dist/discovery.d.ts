@@ -8,6 +8,19 @@ export interface DiscoveredPackage {
     overrides: string;
     dependencies: Record<string, string>;
     peerDependencies: Record<string, string>;
+    /** Vite plugins `manifest()` runs: modules relative to `path`, and their options. */
+    vitePlugins?: DiscoveredVitePlugin[];
+}
+export interface DiscoveredVitePlugin {
+    module: string;
+    options: Record<string, unknown>;
+}
+/** A package's Vite plugin, with its module's absolute path. */
+export interface PackageVitePlugin {
+    package: string;
+    module: string;
+    file: string;
+    options: Record<string, unknown>;
 }
 export interface DiscoveredAsset {
     id: string;
@@ -34,6 +47,7 @@ export interface ResolvedPackage {
     alias: string | null;
     pagesDir: string | null;
     overridesDir: string;
+    vitePlugins: PackageVitePlugin[];
     info: DiscoveredPackage;
 }
 export declare const DEFAULT_DISCOVERY_PATH = "bootstrap/cache/manifest.json";

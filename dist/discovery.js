@@ -39,6 +39,12 @@ export function resolvePackages(root, discovery) {
             alias: info.alias,
             pagesDir: info.pages ? path.join(dir, info.pages) : null,
             overridesDir,
+            vitePlugins: (info.vitePlugins ?? []).map((plugin) => ({
+                package: name,
+                module: plugin.module,
+                file: path.join(dir, plugin.module),
+                options: plugin.options ?? {},
+            })),
             info,
         };
     });

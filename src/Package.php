@@ -19,6 +19,9 @@ class Package
 
     protected ?string $dist_path = null;
 
+    /** @var array<int, array{module: string, options: array<string, mixed>}> */
+    protected array $vite_plugins = [];
+
     /** @var array<string, array<string, string>> scope => name => constraint */
     protected array $npm_dependencies = [];
 
@@ -190,6 +193,36 @@ class Package
     }
 
     /**
+     * A Vite plugin the app's manifest() runs, so apps don't add one plugin per
+     * package to vite.config.js. The module (relative to the resources folder,
+     * like dist()) is built JavaScript whose default export is a plugin
+     * factory; manifest() calls it with the options, merged with the app's.
+     *
+     * @param  array<string, mixed>  $options  JSON-serialisable
+     */
+    public function vitePlugin(string $module, array $options = []): static
+    {
+        $module = trim($module, '/');
+
+        if (! preg_match('/\.(js|mjs)$/i', $module)) {
+            throw InvalidAssetException::invalidVitePlugin($this->name, $module);
+        }
+
+        if ($options && json_encode($options) === false) {
+            throw InvalidAssetException::invalidVitePluginOptions($this->name, $module);
+        }
+
+        $this->vite_plugins = array_values(array_filter(
+            $this->vite_plugins,
+            fn (array $plugin) => $plugin['module'] !== $module,
+        ));
+
+        $this->vite_plugins[] = ['module' => $module, 'options' => $options];
+
+        return $this;
+    }
+
+    /**
      * npm packages the app must install to build this package's assets, or
      * (`for: 'pages'`) its Inertia pages and the JS apps import through its
      * alias. `@inertiajs/*` packages always count as pages.
@@ -245,6 +278,12 @@ class Package
     public function distPath(): ?string
     {
         return $this->dist_path;
+    }
+
+    /** @return array<int, array{module: string, options: array<string, mixed>}> */
+    public function vitePlugins(): array
+    {
+        return $this->vite_plugins;
     }
 
     /**

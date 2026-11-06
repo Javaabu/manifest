@@ -377,6 +377,10 @@ class Manifest
                 'overrides' => $this->relativeToBase($this->overridePath($name)),
                 'dependencies' => (object) $package->npmDependencies(),
                 'peerDependencies' => (object) $package->npmPeerDependencies(),
+                'vitePlugins' => array_map(fn (array $plugin) => [
+                    'module' => $plugin['module'],
+                    'options' => (object) $plugin['options'],
+                ], $package->vitePlugins()),
             ];
         }
 

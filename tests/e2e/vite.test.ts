@@ -86,6 +86,50 @@ describe("vite build", () => {
   })
 })
 
+describe("package Vite plugins", () => {
+  const registered = { label: "ވިޖެޓު", theme: "light" }
+
+  function readPluginFile(dir: string): unknown {
+    const file = path.join(app, "public", dir, "acme-widgets.json")
+
+    return fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, "utf8")) : null
+  }
+
+  afterAll(() => {
+    for (const dir of ["e2e-build-plugin-options", "e2e-build-plugin-off"]) {
+      fs.rmSync(path.join(app, "public", dir), { recursive: true, force: true })
+    }
+  })
+
+  it("runs the plugins packages register, with their options", () => {
+    // Built by the "vite build" suite above.
+    expect(readPluginFile("e2e-build")).toEqual(registered)
+  })
+
+  it("merges the app's options over the package's", async () => {
+    await build(
+      fixtureConfig(
+        { build: { outDir: path.join(app, "public/e2e-build-plugin-options") } },
+        { plugins: { widgets: { theme: "dark" } } },
+      ),
+    )
+
+    expect(readPluginFile("e2e-build-plugin-options")).toEqual({ ...registered, theme: "dark" })
+  })
+
+  it("doesn't run a package's plugins the app turns off", async () => {
+    await build(
+      fixtureConfig(
+        { build: { outDir: path.join(app, "public/e2e-build-plugin-off") } },
+        { plugins: { widgets: false } },
+      ),
+    )
+
+    expect(readManifest("e2e-build-plugin-off")["resources/js/app.tsx"]?.isEntry).toBe(true)
+    expect(readPluginFile("e2e-build-plugin-off")).toBeNull()
+  })
+})
+
 describe("vite build with overrides", () => {
   beforeAll(async () => {
     fs.rmSync(overrides, { recursive: true, force: true })
@@ -174,6 +218,13 @@ describe("vite dev server", () => {
     expect(code).not.toContain('from "@javaabu/widgets"')
   })
 
+  it("runs the packages' Vite plugins", async () => {
+    const response = await fetch(`${base}/__acme-widgets`)
+
+    expect(response.status).toBe(200)
+    expect(await response.json()).toEqual({ label: "ވިޖެޓު", theme: "light" })
+  })
+
   it("serves the Inertia helper and the pages module", async () => {
     const code = await (await fetch(`${base}/resources/js/app.tsx`)).text()
 
@@ -201,5 +252,10 @@ describe("the shipped dist", () => {
     for (const input of assetInputs) {
       expect(manifest[input], input).toBeDefined()
     }
+
+    expect(JSON.parse(fs.readFileSync(path.join(outDir, "acme-widgets.json"), "utf8"))).toEqual({
+      label: "ވިޖެޓު",
+      theme: "light",
+    })
   })
 })

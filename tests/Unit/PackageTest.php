@@ -185,6 +185,38 @@ class PackageTest extends TestCase
     }
 
     #[Test]
+    public function it_registers_vite_plugins_with_their_options(): void
+    {
+        $package = (new Package('localization', '/localization/resources'))
+            ->vitePlugin('../dist/vite.js', ['watch' => ['lang']])
+            ->vitePlugin('../dist/hmr.mjs')
+            ->vitePlugin('/../dist/vite.js', ['watch' => ['lang', 'config']]);
+
+        $this->assertEquals([
+            ['module' => '../dist/hmr.mjs', 'options' => []],
+            ['module' => '../dist/vite.js', 'options' => ['watch' => ['lang', 'config']]],
+        ], $package->vitePlugins());
+    }
+
+    #[Test]
+    public function it_only_registers_built_javascript_as_a_vite_plugin(): void
+    {
+        $this->expectException(InvalidAssetException::class);
+        $this->expectExceptionMessage('Invalid Vite plugin [js/vite.ts] for package [localization]. Register built JavaScript (.js or .mjs)');
+
+        (new Package('localization', '/localization/resources'))->vitePlugin('js/vite.ts');
+    }
+
+    #[Test]
+    public function it_only_accepts_vite_plugin_options_that_can_be_written_as_json(): void
+    {
+        $this->expectException(InvalidAssetException::class);
+        $this->expectExceptionMessage("The options of Vite plugin [../dist/vite.js] for package [localization] can't be written as JSON.");
+
+        (new Package('localization', '/localization/resources'))->vitePlugin('../dist/vite.js', ['bad' => NAN]);
+    }
+
+    #[Test]
     public function it_parses_asset_ids(): void
     {
         $this->assertEquals(['forms', 'select'], Asset::parseId('forms::select'));

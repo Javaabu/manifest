@@ -39,6 +39,8 @@ php artisan manifest:check   # then run the install command it prints (Blade app
 php artisan manifest:types   # TypeScript apps: tsconfig paths + package page types
 ```
 
+`manifest()` also runs the Vite plugins packages register (`->vitePlugin()`), so don't add those packages' plugins to `vite.config.js`. Configure or skip one with `manifest({ plugins: { "js-localization": { ... } | false } })`.
+
 Then:
 
 - **Blade:** using a package component is enough (`<x-filters::filter-bar />`). Its assets are injected once, in dependency order: styles before `</head>`, scripts before `</body>`. To choose where, put `@manifestStyles` in `<head>` and `@manifestScripts` before `</body>`. To load an asset without a component: `@manifestRequire('filters::date-range')` or `Manifest::require('filters::date-range')`.

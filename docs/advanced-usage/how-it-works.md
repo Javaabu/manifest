@@ -37,7 +37,8 @@ Each batch of tags is printed by a clone of the app's `Illuminate\Foundation\Vit
       "dist": "../dist",
       "overrides": "resources/vendor/filters",
       "dependencies": { "@javaabu/onu": "^1.0" },
-      "peerDependencies": { "react": "^19.0" }
+      "peerDependencies": { "react": "^19.0" },
+      "vitePlugins": [{ "module": "../dist/vite.js", "options": { "watch": ["lang"] } }]
     }
   },
   "assets": [
@@ -54,9 +55,12 @@ Each batch of tags is printed by a clone of the app's `Illuminate\Foundation\Vit
 }
 ```
 
+`manifest()` returns its plugin and a promise-like of the packages' plugins. Vite awaits it while it flattens the config's plugins, which runs discovery (from the current directory), imports each package's `vitePlugins` module and calls its default export with the options, the app's `plugins` settings merged in.
+
 The plugin (`enforce: "pre"`):
 
-- `config`: runs discovery, and adds package and override folders to `server.fs.allow`.
+- `config`: runs discovery (unless the package plugins already have, from the same root), and adds package and override folders to `server.fs.allow`.
+- `configResolved`: warns about failed discovery, aliases that shadow npm packages, `plugins` settings for unknown packages, and package plugins also added in `vite.config.js`.
 - `options`: in a client build, adds every asset's entry to Rollup's `input`, with overrides checked at build time (the same rule PHP applies at request time).
 - `resolveId`:
   - `@javaabu/{pkg}[/path]` maps to the package's JS folder, then overrides apply.

@@ -27,10 +27,11 @@ Returned by `Manifest::package()` and passed to `registerAssets()`. Every setter
 | `alias(string $alias)` | The import alias (default `@javaabu/{name}`) |
 | `pages(string $path = 'js/Pages')` | The Inertia pages folder |
 | `dist(string $path = '../dist')` | The prebuilt assets folder |
+| `vitePlugin(string $module, array $options = [])` | A Vite plugin the app's `manifest()` runs: built JS relative to the resources folder, whose default export is a factory called with the (JSON-serialisable) options |
 | `npm(array $dependencies = [], array $peer_dependencies = [], NpmScopes\|string $for = 'assets')` | npm packages the app must install, `name => range`: for the registered assets, or (`'pages'`) only for Inertia pages and alias imports |
 | `name()`, `path(?string $relative = null)` | The package name, and its resources folder (or a path in it) |
 | `assets()`, `asset(string $name)` | The registered `Asset`s |
-| `jsPath()`, `importAlias()`, `pagesPath()`, `distPath()`, `npmDependencies()`, `npmPeerDependencies()`, `assetFolders()` | What was registered |
+| `jsPath()`, `importAlias()`, `pagesPath()`, `distPath()`, `vitePlugins()`, `npmDependencies()`, `npmPeerDependencies()`, `assetFolders()` | What was registered |
 
 ## `Javaabu\Manifest\Facades\Manifest`
 
@@ -100,11 +101,13 @@ Everything ships in `vendor/javaabu/manifest/dist`. Import it by path, or as `@j
 
 | Export | |
 | --- | --- |
-| `default`, `manifest(options?: ManifestPluginOptions): ManifestPlugin` | The Vite plugin. Options: `discover`, `discovery`, `input`. See [Vite](../basic-usage/vite#options). |
-| `ManifestPlugin.inputs(): string[]` | Every registered asset's entry, relative to the Vite root |
-| `ManifestPlugin.packages(): ResolvedPackage[]` | The discovered packages |
+| `default`, `manifest(options?: ManifestPluginOptions): ManifestPlugins` | The Vite plugin, followed by the packages' Vite plugins (an array Vite flattens). Options: `discover`, `discovery`, `input`, `plugins`. See [Vite](../basic-usage/vite#options). |
+| `ManifestPlugins.plugin: ManifestPlugin` | manifest's own plugin |
+| `inputs(): string[]` (on both) | Every registered asset's entry, relative to the Vite root |
+| `packages(): ResolvedPackage[]` (on both) | The discovered packages |
+| `ManifestPlugin.packagePlugins(): Promise<LoadedPackagePlugin[]>` | Imports and runs the packages' Vite plugins (once) |
 | `computeInputs()`, `mergeInputs()`, `rewriteManifestKeys()` | The building blocks, for other tooling |
-| types `Discovery`, `DiscoveredPackage`, `DiscoveredAsset`, `ResolvedPackage` | The discovery file's shape |
+| types `Discovery`, `DiscoveredPackage`, `DiscoveredAsset`, `DiscoveredVitePlugin`, `ResolvedPackage`, `PackageVitePlugin`, `PackagePluginSettings` | The discovery file's shape, and the `plugins` option |
 
 ## `@javaabu/manifest/inertia` (`dist/inertia.js`)
 

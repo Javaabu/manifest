@@ -17,3 +17,4 @@ Initial development of v1.0:
 - `assertInertia()` finds package pages on inertia-laravel v3 as well as v2 (#15).
 - Injecting assets keeps the response's view, so `assertViewIs()` and `assertViewHas()` work in Blade apps (#16).
 - `npm(..., for: 'pages')` scopes dependencies to Inertia pages and alias imports, and `manifest:check` only checks them when the app uses Inertia (or `--scope=pages`), so Blade apps can run it in CI (#17).
+- `->vitePlugin($module, $options)` registers a package's Vite plugin, which `manifest()` runs, so apps don't add one plugin per package to `vite.config.js`. Apps configure or turn them off with `manifest({ plugins: { pkg: {...} | false } })` (#14).

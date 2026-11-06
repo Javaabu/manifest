@@ -1,5 +1,6 @@
-import { type Plugin } from "vite";
+import { type Plugin, type PluginOption } from "vite";
 import { type Discovery, type ResolvedPackage } from "./discovery.js";
+import { type LoadedPackagePlugin, type PackagePluginSettings } from "./plugins.js";
 export interface ManifestPluginOptions {
     /**
      * The file `php artisan manifest:discover` writes, relative to the Vite root.
@@ -20,11 +21,30 @@ export interface ManifestPluginOptions {
      * @default true
      */
     input?: boolean;
+    /**
+     * The Vite plugins packages register (`->vitePlugin()`), by package name:
+     * `false` doesn't run that package's plugins, and an object is merged over
+     * the options the package registered.
+     * @default {}
+     */
+    plugins?: PackagePluginSettings;
 }
 export interface ManifestPlugin extends Plugin {
     /** The discovered packages, once Vite has resolved its config. */
     packages(): ResolvedPackage[];
     /** Every registered asset's entry (overrides applied), relative to the Vite root. */
+    inputs(): string[];
+    /** Imports and runs the packages' Vite plugins (once). */
+    packagePlugins(): Promise<LoadedPackagePlugin[]>;
+}
+/**
+ * What `manifest()` returns: manifest's own plugin, then the packages' Vite
+ * plugins. Vite flattens it; `packages()` and `inputs()` work on it too.
+ */
+export interface ManifestPlugins extends Array<PluginOption> {
+    /** manifest's own plugin. */
+    plugin: ManifestPlugin;
+    packages(): ResolvedPackage[];
     inputs(): string[];
 }
 export declare const INERTIA_MODULE_ID = "@javaabu/manifest/inertia";
@@ -43,11 +63,12 @@ export declare function mergeInputs(existing: RollupInput, inputs: string[]): Ro
  */
 export declare function rewriteManifestKeys(root: string, manifest: Record<string, ManifestChunk>, packages: ResolvedPackage[]): boolean;
 /**
- * Builds the assets Laravel packages register with javaabu/manifest. Use it
- * next to laravel-vite-plugin:
+ * Builds the assets Laravel packages register with javaabu/manifest, and runs
+ * the Vite plugins they register. Use it next to laravel-vite-plugin:
  *
  *     plugins: [laravel({ input: ["resources/js/app.ts"] }), manifest()]
  */
-export default function manifest(options?: ManifestPluginOptions): ManifestPlugin;
+export default function manifest(options?: ManifestPluginOptions): ManifestPlugins;
 export { manifest };
-export type { Discovery, DiscoveredAsset, DiscoveredPackage, ResolvedPackage } from "./discovery.js";
+export type { Discovery, DiscoveredAsset, DiscoveredPackage, DiscoveredVitePlugin, PackageVitePlugin, ResolvedPackage, } from "./discovery.js";
+export type { LoadedPackagePlugin, PackagePluginSettings } from "./plugins.js";
