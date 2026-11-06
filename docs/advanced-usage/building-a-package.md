@@ -140,6 +140,7 @@ $package->vitePlugin('../dist/vite.js', ['watch' => ['lang']]);
 - The module is relative to the folder passed to `registerAssets()`, like `dist()`. It must be **built JavaScript** (`.js` or `.mjs`), since it's imported by Node when Vite loads the app's config: commit it, as manifest commits its own `dist/`. A `.js` file needs a `package.json` with `"type": "module"` next to it or above it in your package (don't `export-ignore` it), or use `.mjs`.
 - Its default export is a factory, called with the options: a plugin, an array of plugins, or a promise of either.
 - The options must be JSON-serialisable: they go through `bootstrap/cache/manifest.json`. Apps can merge their own over them, or turn your plugin off, with `manifest({ plugins: { "your-package": { ... } | false } })`.
+- Node imports the module from its real location, so its bare imports resolve from there, not from the app (for a package symlinked from a path repository, that's outside the app). Import only Node built-ins (`node:fs`, `node:path`, …) and bundle anything else into the module. `import type` from `vite` is fine.
 - Plugins run after manifest's own plugin, in package order. They run in every Vite command, like any plugin in `vite.config.js`: use `apply` or the hooks you need.
 
 ```js
