@@ -159,6 +159,8 @@ $package->npm(
 
 Both kinds must be installed by the app. Peer dependencies are the ones that must have a single copy shared with the app (React, Vue). `php artisan manifest:check` tells the app developer what's missing. See [Building a package](../advanced-usage/building-a-package).
 
+Declare what only your Inertia pages (and code apps import through your alias) need with `for: 'pages'`, so Blade apps aren't asked for it. See [Pages-only dependencies](../advanced-usage/building-a-package#pages-only-dependencies).
+
 # Prebuilt assets
 
 `dist()` points at a folder of prebuilt assets, for apps that don't build with Vite:

@@ -40,6 +40,8 @@ These Dhivehi lines are technical terms with no settled translation. A native sp
 | `list.depends_on` | ބަރޯސާވަނީ | Depends on |
 | `list.override` | އޯވަރައިޑް | override |
 | `check.needs` | ބޭނުންވާ ވާޝަން | Needs |
+| `check.pages_skipped` | އެޑެޕްޓަރެއް, ޕޭޖުތައް | adapter, pages |
+| `check.invalid_scope` | ސްކޯޕް | scope |
 | `override.copied` | … ބަދަލުތައް ގެންނާނީ އެތަނުގައި … | Edit it there … |
 
 # RTL

@@ -4,6 +4,7 @@ namespace Javaabu\Manifest\Tests\Unit;
 
 use Javaabu\Manifest\Asset;
 use Javaabu\Manifest\Enums\AssetTypes;
+use Javaabu\Manifest\Enums\NpmScopes;
 use Javaabu\Manifest\Exceptions\InvalidAssetException;
 use Javaabu\Manifest\Package;
 use PHPUnit\Framework\Attributes\Test;
@@ -157,6 +158,30 @@ class PackageTest extends TestCase
         $this->assertEquals('../dist', $package->distPath());
         $this->assertEquals(['@javaabu/onu' => '^1.0', 'dayjs' => '^1.11'], $package->npmDependencies());
         $this->assertEquals(['react' => '^19.0'], $package->npmPeerDependencies());
+    }
+
+    #[Test]
+    public function it_scopes_npm_dependencies_to_assets_or_pages(): void
+    {
+        $package = (new Package('filters', '/filters'))
+            ->npm(['@javaabu/onu' => '^1.0'], ['react' => '^19.0', '@inertiajs/react' => '^3.0'])
+            ->npm(['recharts' => '^3.0'], for: NpmScopes::PAGES)
+            ->npm(['uqr' => '^0.1'], for: 'pages');
+
+        $this->assertEquals(['@javaabu/onu' => '^1.0'], $package->npmDependencies(NpmScopes::ASSETS));
+        $this->assertEquals(['react' => '^19.0'], $package->npmPeerDependencies(NpmScopes::ASSETS));
+        $this->assertEquals(['recharts' => '^3.0', 'uqr' => '^0.1'], $package->npmDependencies(NpmScopes::PAGES));
+        $this->assertEquals(['@inertiajs/react' => '^3.0'], $package->npmPeerDependencies(NpmScopes::PAGES));
+        $this->assertEquals(['@javaabu/onu' => '^1.0', 'recharts' => '^3.0', 'uqr' => '^0.1'], $package->npmDependencies());
+    }
+
+    #[Test]
+    public function it_rejects_unknown_npm_scopes(): void
+    {
+        $this->expectException(InvalidAssetException::class);
+        $this->expectExceptionMessage('Invalid npm scope [inertia]. Use assets or pages.');
+
+        (new Package('filters', '/filters'))->npm(['recharts' => '^3.0'], for: 'inertia');
     }
 
     #[Test]

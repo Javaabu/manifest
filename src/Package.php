@@ -3,6 +3,7 @@
 namespace Javaabu\Manifest;
 
 use Javaabu\Manifest\Enums\AssetTypes;
+use Javaabu\Manifest\Enums\NpmScopes;
 use Javaabu\Manifest\Exceptions\InvalidAssetException;
 
 class Package
@@ -18,10 +19,10 @@ class Package
 
     protected ?string $dist_path = null;
 
-    /** @var array<string, string> */
+    /** @var array<string, array<string, string>> scope => name => constraint */
     protected array $npm_dependencies = [];
 
-    /** @var array<string, string> */
+    /** @var array<string, array<string, string>> scope => name => constraint */
     protected array $npm_peer_dependencies = [];
 
     public function __construct(
@@ -189,15 +190,24 @@ class Package
     }
 
     /**
-     * npm packages the app must install to build this package's assets.
+     * npm packages the app must install to build this package's assets, or
+     * (`for: 'pages'`) its Inertia pages and the JS apps import through its
+     * alias. `@inertiajs/*` packages always count as pages.
      *
      * @param  array<string, string>  $dependencies  name => version constraint
      * @param  array<string, string>  $peer_dependencies  kept out of prebuilt bundles
      */
-    public function npm(array $dependencies = [], array $peer_dependencies = []): static
+    public function npm(array $dependencies = [], array $peer_dependencies = [], NpmScopes|string $for = NpmScopes::ASSETS): static
     {
-        $this->npm_dependencies = array_merge($this->npm_dependencies, $dependencies);
-        $this->npm_peer_dependencies = array_merge($this->npm_peer_dependencies, $peer_dependencies);
+        $scope = NpmScopes::fromValue($for);
+
+        foreach ($dependencies as $name => $constraint) {
+            $this->npm_dependencies[NpmScopes::forDependency($name, $scope)->value][$name] = $constraint;
+        }
+
+        foreach ($peer_dependencies as $name => $constraint) {
+            $this->npm_peer_dependencies[NpmScopes::forDependency($name, $scope)->value][$name] = $constraint;
+        }
 
         return $this;
     }
@@ -266,16 +276,43 @@ class Package
         return array_keys($folders);
     }
 
-    /** @return array<string, string> */
-    public function npmDependencies(): array
+    /**
+     * Every scope's, or one scope's, npm dependencies.
+     *
+     * @return array<string, string>
+     */
+    public function npmDependencies(?NpmScopes $scope = null): array
     {
-        return $this->npm_dependencies;
+        return $this->scopedNpm($this->npm_dependencies, $scope);
     }
 
-    /** @return array<string, string> */
-    public function npmPeerDependencies(): array
+    /**
+     * Every scope's, or one scope's, npm peer dependencies.
+     *
+     * @return array<string, string>
+     */
+    public function npmPeerDependencies(?NpmScopes $scope = null): array
     {
-        return $this->npm_peer_dependencies;
+        return $this->scopedNpm($this->npm_peer_dependencies, $scope);
+    }
+
+    /**
+     * @param  array<string, array<string, string>>  $dependencies
+     * @return array<string, string>
+     */
+    protected function scopedNpm(array $dependencies, ?NpmScopes $scope): array
+    {
+        if ($scope) {
+            return $dependencies[$scope->value] ?? [];
+        }
+
+        $all = [];
+
+        foreach (NpmScopes::cases() as $case) {
+            $all = [...$all, ...($dependencies[$case->value] ?? [])];
+        }
+
+        return $all;
     }
 
     /**

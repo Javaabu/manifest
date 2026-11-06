@@ -35,7 +35,7 @@ export default defineConfig({
 ```
 
 ```bash
-php artisan manifest:check   # then run the install command it prints
+php artisan manifest:check   # then run the install command it prints (Blade apps skip pages-only deps)
 php artisan manifest:types   # TypeScript apps: tsconfig paths + package page types
 ```
 

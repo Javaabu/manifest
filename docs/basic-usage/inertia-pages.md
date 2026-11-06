@@ -27,7 +27,7 @@ $this->registerAssets('filters', __DIR__ . '/../resources', function (Package $p
         ->npm(['@javaabu/forms' => 'github:Javaabu/react-forms#main'], peer_dependencies: [
             'react' => '^19.0',
             '@inertiajs/react' => '^2.0',
-        ]);
+        ], for: 'pages');   // Blade apps don't need these
 });
 ```
 

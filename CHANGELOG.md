@@ -16,3 +16,4 @@ Initial development of v1.0:
 - `Manifest::fake()` with assertions for tests.
 - `assertInertia()` finds package pages on inertia-laravel v3 as well as v2 (#15).
 - Injecting assets keeps the response's view, so `assertViewIs()` and `assertViewHas()` work in Blade apps (#16).
+- `npm(..., for: 'pages')` scopes dependencies to Inertia pages and alias imports, and `manifest:check` only checks them when the app uses Inertia (or `--scope=pages`), so Blade apps can run it in CI (#17).

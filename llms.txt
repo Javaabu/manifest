@@ -13,7 +13,7 @@ Paths are relative to this file. In an app, that's vendor/javaabu/manifest/.
 - Package JS is imported as `@javaabu/{name}` (after `->js()`), resolved by the Vite plugin: `import manifest from "./vendor/javaabu/manifest/dist/vite.js"` next to `laravel()`. Never copy package JS into the app to use it.
 - Inertia: `Inertia::render('pkg::Page')`, and in the app `resolve: (name) => resolvePage(name, import.meta.glob("./pages/**/*.tsx"))` from `@javaabu/manifest/inertia`.
 - To change a package's file, override that one file at `resources/vendor/{package}/<same path>` (`php artisan manifest:override pkg path`). Don't edit vendor/.
-- Packages declare npm packages their code imports with `->npm()`; apps run `php artisan manifest:check` to install them.
+- Packages declare npm packages their code imports with `->npm()` (`for: 'pages'` for what only Inertia pages and alias imports need); apps run `php artisan manifest:check` to install them. Blade apps aren't asked for pages-only packages.
 - Run `php artisan manifest:types` after installing packages in a TypeScript app.
 - In tests, `Manifest::fake()` then `Manifest::assertAssetRequired('pkg::asset')`.
 - Asset tags are rendered by Laravel's Vite: `Vite::useCspNonce()` and friends apply.

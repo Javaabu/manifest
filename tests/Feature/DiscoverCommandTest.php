@@ -48,8 +48,8 @@ class DiscoverCommandTest extends TestCase
             'pages' => 'js/Pages',
             'dist' => null,
             'overrides' => 'resources/vendor/filters',
-            'dependencies' => ['@javaabu/onu' => '^1.0'],
-            'peerDependencies' => ['react' => '^19.0', 'react-dom' => '^19.0'],
+            'dependencies' => ['@javaabu/onu' => '^1.0', 'recharts' => '^3.0'],
+            'peerDependencies' => ['react' => '^19.0', 'react-dom' => '^19.0', '@inertiajs/react' => '^2.0 || ^3.0'],
         ], $data['packages']['filters']);
 
         $this->assertEquals(

@@ -3,12 +3,14 @@
 namespace Javaabu\Manifest\Commands;
 
 use Illuminate\Console\Command;
+use Javaabu\Manifest\Enums\NpmScopes;
 use Javaabu\Manifest\Manifest;
 use Javaabu\Manifest\Support\NpmVersion;
 
 class CheckCommand extends Command
 {
     protected $signature = 'manifest:check
+                            {--scope=* : What to check: assets, pages, or both (default: assets, and pages if the app uses Inertia)}
                             {--json : Output JSON}';
 
     protected $description = 'Check that the app has installed the npm packages its Laravel packages need';
@@ -16,9 +18,15 @@ class CheckCommand extends Command
     public function handle(Manifest $manifest): int
     {
         $declared = $this->declaredDependencies();
+        $scopes = $this->scopes($declared);
+
+        if ($scopes === null) {
+            return self::FAILURE;
+        }
+
         $rows = [];
 
-        foreach ($this->requirements($manifest) as $name => $requirement) {
+        foreach ($this->requirements($manifest, $scopes) as $name => $requirement) {
             $installed = $this->installedVersion($name);
 
             $status = match (true) {
@@ -31,6 +39,7 @@ class CheckCommand extends Command
                 'name' => $name,
                 'constraints' => $requirement['constraints'],
                 'needed_by' => array_values(array_unique($requirement['needed_by'])),
+                'scopes' => array_values(array_unique($requirement['scopes'])),
                 'declared' => $declared[$name] ?? null,
                 'installed' => $installed,
                 'status' => $status,
@@ -43,6 +52,10 @@ class CheckCommand extends Command
             $this->line(json_encode($rows, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
             return $problems ? self::FAILURE : self::SUCCESS;
+        }
+
+        if ($this->skipsPages($manifest, $scopes)) {
+            $this->components->info(__('manifest::messages.check.pages_skipped'));
         }
 
         if (! $rows) {
@@ -82,38 +95,106 @@ class CheckCommand extends Command
     }
 
     /**
-     * @return array<string, array{constraints: array<int, string>, needed_by: array<int, string>}>
+     * The scopes to check: the --scope option, or the assets, and the pages
+     * when the app installs an Inertia adapter. Null when an option is invalid.
+     *
+     * @param  array<string, string>  $declared
+     * @return array<int, NpmScopes>|null
      */
-    protected function requirements(Manifest $manifest): array
+    protected function scopes(array $declared): ?array
+    {
+        $options = (array) $this->option('scope');
+
+        if (! $options) {
+            $uses_inertia = (bool) array_filter(array_keys($declared), fn (string $name) => str_starts_with($name, '@inertiajs/'));
+
+            return $uses_inertia ? [NpmScopes::ASSETS, NpmScopes::PAGES] : [NpmScopes::ASSETS];
+        }
+
+        $scopes = [];
+
+        foreach ($options as $option) {
+            $scope = NpmScopes::tryFrom($option);
+
+            if (! $scope) {
+                $this->components->error(__('manifest::messages.check.invalid_scope', [
+                    'scope' => $option,
+                    'scopes' => implode(', ', NpmScopes::values()),
+                ]));
+
+                return null;
+            }
+
+            $scopes[$scope->value] = $scope;
+        }
+
+        return array_values($scopes);
+    }
+
+    /**
+     * Whether pages aren't checked, though a package has some.
+     *
+     * @param  array<int, NpmScopes>  $scopes
+     */
+    protected function skipsPages(Manifest $manifest, array $scopes): bool
+    {
+        if (in_array(NpmScopes::PAGES, $scopes, true)) {
+            return false;
+        }
+
+        foreach ($manifest->packages() as $package) {
+            if ($package->npmDependencies(NpmScopes::PAGES) || $package->npmPeerDependencies(NpmScopes::PAGES)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param  array<int, NpmScopes>  $scopes
+     * @return array<string, array{constraints: array<int, string>, needed_by: array<int, string>, scopes: array<int, string>}>
+     */
+    protected function requirements(Manifest $manifest, array $scopes): array
     {
         $requirements = [];
 
-        $add = function (string $name, string $constraint, string $needed_by) use (&$requirements) {
-            $requirements[$name] ??= ['constraints' => [], 'needed_by' => []];
+        $add = function (string $name, string $constraint, string $needed_by, NpmScopes $scope) use (&$requirements) {
+            $requirements[$name] ??= ['constraints' => [], 'needed_by' => [], 'scopes' => []];
 
             if ($constraint !== '*') {
                 $requirements[$name]['constraints'][] = $constraint;
             }
 
             $requirements[$name]['needed_by'][] = $needed_by;
+            $requirements[$name]['scopes'][] = $scope->value;
         };
 
         foreach ($manifest->packages() as $package_name => $package) {
-            $dependencies = [...$package->npmDependencies(), ...$package->npmPeerDependencies()];
+            foreach ($scopes as $scope) {
+                $dependencies = [...$package->npmDependencies($scope), ...$package->npmPeerDependencies($scope)];
 
-            foreach ($dependencies as $name => $constraint) {
-                $add($name, $constraint, $package_name);
-            }
-
-            foreach ($package->assets() as $asset) {
-                foreach ($asset->type->buildRequirements() as $name) {
-                    $add($name, '*', $package_name);
+                foreach ($dependencies as $name => $constraint) {
+                    $add($name, $constraint, $package_name, $scope);
                 }
             }
 
-            if ($package->assets() || $package->pagesPath()) {
-                $add('vite', '*', $package_name);
-                $add('laravel-vite-plugin', '*', $package_name);
+            $builds_assets = in_array(NpmScopes::ASSETS, $scopes, true) && $package->assets();
+            $builds_pages = in_array(NpmScopes::PAGES, $scopes, true) && ($package->pagesPath() || $package->jsPath());
+
+            if ($builds_assets) {
+                foreach ($package->assets() as $asset) {
+                    foreach ($asset->type->buildRequirements() as $name) {
+                        $add($name, '*', $package_name, NpmScopes::ASSETS);
+                    }
+                }
+            }
+
+            if ($builds_assets || $builds_pages) {
+                $scope = $builds_assets ? NpmScopes::ASSETS : NpmScopes::PAGES;
+
+                $add('vite', '*', $package_name, $scope);
+                $add('laravel-vite-plugin', '*', $package_name, $scope);
             }
         }
 

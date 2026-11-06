@@ -85,13 +85,29 @@ $package->npm(
 
 Ranges use npm syntax (`^`, `~`, `>=`, `||`, x-ranges, hyphen ranges). Git and `file:` dependencies (`github:Javaabu/react-forms#main`) are fine; their version isn't checked.
 
+## Pages-only dependencies
+
+A Blade app builds your registered assets, but never your Inertia pages or the code apps import through your alias. Declare what only those need with `for: 'pages'`, so Blade apps aren't asked to install it:
+
+```php
+$package
+    ->npm(['tom-select' => '^2.4'])                    // the registered assets import these
+    ->npm(
+        ['@javaabu/forms' => 'github:Javaabu/react-forms#main', 'recharts' => '^3.0'],
+        peer_dependencies: ['react' => '^19.0', '@inertiajs/react' => '^2.0 || ^3.0'],
+        for: 'pages',                                   // only pages and alias imports use these
+    );
+```
+
+`for` takes `'assets'` (the default) or `'pages'`, or the `NpmScopes` enum. `@inertiajs/*` packages always count as pages, wherever they're declared. If a registered asset imports something (a Blade island that renders React, say), it belongs in the assets.
+
 The app developer runs:
 
 ```bash
 php artisan manifest:check
 ```
 
-It lists every npm package the app's Laravel packages need: their `npm()` dependencies, `sass` for Sass styles, React or Vue and their Vite plugins for `react()` / `vue()` assets, and `vite` and `laravel-vite-plugin`. Each is checked against `package.json` and the installed version in `node_modules`, and the command prints the install command for the app's package manager (npm, pnpm, Yarn or Bun). It exits with an error when something is missing, so it can run in CI.
+It lists every npm package the app's Laravel packages need: their `npm()` dependencies, `sass` for Sass styles, React or Vue and their Vite plugins for `react()` / `vue()` assets, and `vite` and `laravel-vite-plugin`. It checks what the registered assets need, and what pages need when the app's `package.json` has an Inertia adapter (`@inertiajs/react`, `@inertiajs/vue3`, …). So a Blade app isn't asked for packages only Inertia pages use. Choose yourself with `--scope=assets`, `--scope=pages` or both. Each is checked against `package.json` and the installed version in `node_modules`, and the command prints the install command for the app's package manager (npm, pnpm, Yarn or Bun). It exits with an error when something is missing, so it can run in CI.
 
 Keep your package's own `package.json` for developing the package: Vite, TypeScript, and the dependencies above as dev dependencies so your tests and builds work. Apps never install it.
 

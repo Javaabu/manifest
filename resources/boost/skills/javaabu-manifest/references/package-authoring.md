@@ -63,7 +63,7 @@ Anonymous components: `@manifestRequire('filters::chart')` at the top of the vie
 
 ## Write the JS
 
-- Import your own code relatively, other packages through their alias (`@javaabu/widgets`), npm packages by name. Every npm import must be in `->npm()`.
+- Import your own code relatively, other packages through their alias (`@javaabu/widgets`), npm packages by name. Every npm import must be in `->npm()`. Put what only Inertia pages or alias imports use in `->npm([...], [...], for: 'pages')`, so Blade apps' `manifest:check` doesn't ask for it.
 - A script's CSS can be imported by the script (`import './select.css'`). Register standalone CSS that must be in `<head>` as a style.
 - Inertia pages live in `resources/js/Pages/**` with a default export. `Pages/Reports/Show.tsx` is `filters::Reports/Show`.
 - Use logical CSS (`margin-inline-start`, `ps-4`), never left/right, and `@javaabu/i18n` for strings.

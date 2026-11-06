@@ -35,4 +35,9 @@ class InvalidAssetException extends InvalidArgumentException
     {
         return new self("Invalid package name [{$name}]. Use lowercase letters, numbers and dashes.");
     }
+
+    public static function invalidNpmScope(string $scope): self
+    {
+        return new self("Invalid npm scope [{$scope}]. Use assets or pages.");
+    }
 }

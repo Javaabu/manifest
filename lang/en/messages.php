@@ -34,6 +34,8 @@ return [
         'nothing' => 'No package needs anything from npm.',
         'ok' => 'Everything the packages need is installed.',
         'problems' => '{1} :count npm package is missing or the wrong version. Install it with:|[2,*] :count npm packages are missing or the wrong version. Install them with:',
+        'pages_skipped' => 'Package pages weren\'t checked, because the app doesn\'t install an Inertia adapter. Check them too with --scope=assets --scope=pages.',
+        'invalid_scope' => 'Unknown scope [:scope]. Use :scopes.',
         'statuses' => [
             'ok' => 'OK',
             'unchecked' => 'Installed (version not checked)',

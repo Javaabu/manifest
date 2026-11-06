@@ -27,7 +27,7 @@ Returned by `Manifest::package()` and passed to `registerAssets()`. Every setter
 | `alias(string $alias)` | The import alias (default `@javaabu/{name}`) |
 | `pages(string $path = 'js/Pages')` | The Inertia pages folder |
 | `dist(string $path = '../dist')` | The prebuilt assets folder |
-| `npm(array $dependencies = [], array $peer_dependencies = [])` | npm packages the app must install, `name => range` |
+| `npm(array $dependencies = [], array $peer_dependencies = [], NpmScopes\|string $for = 'assets')` | npm packages the app must install, `name => range`: for the registered assets, or (`'pages'`) only for Inertia pages and alias imports |
 | `name()`, `path(?string $relative = null)` | The package name, and its resources folder (or a path in it) |
 | `assets()`, `asset(string $name)` | The registered `Asset`s |
 | `jsPath()`, `importAlias()`, `pagesPath()`, `distPath()`, `npmDependencies()`, `npmPeerDependencies()`, `assetFolders()` | What was registered |
